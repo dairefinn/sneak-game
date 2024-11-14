@@ -1,4 +1,6 @@
-[gd_scene load_steps=7 format=3 uid="uid://dksfr8nd8sx31"]
+[gd_scene load_steps=8 format=3 uid="uid://dksfr8nd8sx31"]
+
+[ext_resource type="PackedScene" uid="uid://dgcbwywcy3jts" path="res://world/spawn_point.tscn" id="1_ufn8s"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_vi3x2"]
 size = Vector3(100, 1, 100)
@@ -57,3 +59,27 @@ shape = SubResource("BoxShape3D_vg4sy")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="CollisionShape3D5"]
 mesh = SubResource("BoxMesh_fsijl")
+
+[node name="CollisionShape3D6" type="CollisionShape3D" parent="."]
+transform = Transform3D(0.873815, 0.486259, 0, -0.486259, 0.873815, 0, 0, 0, 1, -12.7853, -1.73805, 7.99345)
+shape = SubResource("BoxShape3D_vg4sy")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="CollisionShape3D6"]
+mesh = SubResource("BoxMesh_fsijl")
+
+[node name="CollisionShape3D7" type="CollisionShape3D" parent="."]
+transform = Transform3D(0.662803, 0.748794, 0, -0.748794, 0.662803, 0, 0, 0, 1, -12.7853, -1.73805, 15.3067)
+shape = SubResource("BoxShape3D_vg4sy")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="CollisionShape3D7"]
+mesh = SubResource("BoxMesh_fsijl")
+
+[node name="CollisionShape3D8" type="CollisionShape3D" parent="."]
+transform = Transform3D(0.363804, 0.931476, 0, -0.931476, 0.363804, 0, 0, 0, 1, -12.7853, -1.73805, 23.6736)
+shape = SubResource("BoxShape3D_vg4sy")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="CollisionShape3D8"]
+mesh = SubResource("BoxMesh_fsijl")
+
+[node name="SpawnPoint" parent="." instance=ExtResource("1_ufn8s")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18.8771, 2, 5.46989)

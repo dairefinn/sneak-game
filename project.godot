@@ -19,6 +19,10 @@ config/icon="res://icon.svg"
 
 project/assembly_name="sneak"
 
+[global_group]
+
+spawn_points="Places where the player can be spawned"
+
 [input]
 
 move_front={

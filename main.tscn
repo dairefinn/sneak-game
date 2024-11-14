@@ -1,30 +1,33 @@
-[gd_scene load_steps=6 format=3 uid="uid://bajf0rhqebn0r"]
+[gd_scene load_steps=8 format=3 uid="uid://bajf0rhqebn0r"]
 
 [ext_resource type="PackedScene" uid="uid://dksfr8nd8sx31" path="res://world/levels/level_testing/level_testing.tscn" id="1_1wx7x"]
 [ext_resource type="PackedScene" uid="uid://di33ivj0tqhie" path="res://character/scenes/player.tscn" id="2_8hm8e"]
 [ext_resource type="Script" path="res://character/resources/CameraController.cs" id="2_btmad"]
 [ext_resource type="Resource" uid="uid://cisethjnr0wmk" path="res://character/resources/camera_settings/camera_thirdperson.tres" id="3_fj6uk"]
+[ext_resource type="Script" path="res://world/LevelHandler.cs" id="4_g887l"]
 [ext_resource type="PackedScene" uid="uid://byviaf7ni73qp" path="res://ui/crosshair.tscn" id="5_hlfm5"]
+[ext_resource type="Script" path="res://world/SpawningHandler.cs" id="6_cr3jo"]
 
 [node name="Main" type="Node3D"]
 
-[node name="Player" parent="." instance=ExtResource("2_8hm8e")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.9283, 3.25142, 0)
-
-[node name="Camera3D" type="Camera3D" parent="." node_paths=PackedStringArray("FocusedEntity")]
+[node name="MainCamera" type="Camera3D" parent="." node_paths=PackedStringArray("FocusedEntity")]
 transform = Transform3D(0.999998, 0.00193988, -0.000959941, -0.00194208, 0.999995, -0.00230014, 0.000955475, 0.002302, 0.999997, 13.3406, 2.13342, 3.89499)
 current = true
 script = ExtResource("2_btmad")
-FocusedEntity = NodePath("../Player")
+FocusedEntity = NodePath("")
 CameraSettings = ExtResource("3_fj6uk")
 
-[node name="LevelTesting" parent="." instance=ExtResource("1_1wx7x")]
-
-[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+[node name="Sun" type="DirectionalLight3D" parent="."]
 transform = Transform3D(0.999102, 0.0410406, 0.0105305, -0.0403305, 0.844986, 0.533265, 0.0129875, -0.533211, 0.845882, 0, 65.2942, 0)
 shadow_enabled = true
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+[node name="LevelHandler" type="Node" parent="."]
+script = ExtResource("4_g887l")
+DefaultScene = ExtResource("1_1wx7x")
+
+[node name="SpawningHandler" type="Node" parent="."]
+script = ExtResource("6_cr3jo")
+PlayerScene = ExtResource("2_8hm8e")
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 
