@@ -5,16 +5,16 @@ using Godot;
 public partial class Player : CharacterBody3D
 {
 
-    public static readonly int SPEED_CONSTANT = 10;
-    public static readonly int JUMP_HEIGHT = 5;
-    public static readonly int CROUCH_HEIGHT = 2;
+	[ExportGroup("Physics")]
+    [Export] public int SPEED = 10;
+	[Export] public int DASH_MULTIPLIER = 2;
+    [Export] public int JUMP_HEIGHT = 5;
+    [Export] public int CROUCH_HEIGHT = 2;
+	[Export] public bool AffectedByGravity { get; set; } = true;
+	[Export] public Vector3 GRAVITY_VECTOR = new(0, -9.8f, 0); // TODO: Replace with actual gravity value when I figure out where to put it
 
-	// TODO: Replace with actual gravity value when I figure out where to put it
-	public static readonly Vector3 GRAVITY_VECTOR = new(0, -9.8f, 0);
-
+	[ExportGroup("Stats")]
 	[Export] public CharacterStats Stats { get; set; }
-
-	[Export] public bool Gravity { get; set; }
 
 
 	private CameraController Camera { get; set; }
@@ -32,10 +32,7 @@ public partial class Player : CharacterBody3D
     {
         base._Process(delta);
 
-		if (Camera == null)
-		{
-			Camera = CameraController.Instance;
-		}
+		Camera ??= CameraController.Instance;
 		
 		Vector3 desiredMovement = GetDesiredMovementVector();
 		if (Camera != null)
@@ -67,7 +64,7 @@ public partial class Player : CharacterBody3D
 
 	private Vector3 ApplyGravity(Vector3 velocity, double delta)
 	{
-		if (!Gravity) return velocity;
+		if (!AffectedByGravity) return velocity;
 
 		if (IsOnFloor())
 		{
@@ -83,7 +80,7 @@ public partial class Player : CharacterBody3D
 
 	public Vector3 ApplyMovement(Vector3 desiredMovement, Vector3 velocity, double delta)
 	{
-		Vector3 movement = desiredMovement * SPEED_CONSTANT;
+		Vector3 movement = desiredMovement * SPEED;
 
 		velocity.X = movement.X;
 		velocity.Z = movement.Z;
@@ -114,8 +111,17 @@ public partial class Player : CharacterBody3D
 
         if (Input.IsActionPressed("move_crouch")) // && IsOnFloor() <-- Add this to prevent crouch jumping
         {
+			GD.Print("Crouching");
 			newScale.Y = 0.5f;
+
+			if (IsOnFloor())
+			{
+				Vector3 slideDirection = velocity.Normalized();
+				Vector3 slideVelocity = slideDirection * SPEED * DASH_MULTIPLIER;
+				velocity += slideVelocity;
+			}
         } else {
+			GD.Print("Not crouching");
 			newScale.Y = 1f;
 		}
 
