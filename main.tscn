@@ -1,8 +1,10 @@
-[gd_scene load_steps=4 format=3 uid="uid://bajf0rhqebn0r"]
+[gd_scene load_steps=6 format=3 uid="uid://bajf0rhqebn0r"]
 
 [ext_resource type="PackedScene" uid="uid://dksfr8nd8sx31" path="res://world/levels/level_testing/level_testing.tscn" id="1_1wx7x"]
 [ext_resource type="PackedScene" uid="uid://di33ivj0tqhie" path="res://character/scenes/player.tscn" id="2_8hm8e"]
 [ext_resource type="Script" path="res://character/resources/CameraController.cs" id="2_btmad"]
+[ext_resource type="Resource" uid="uid://cisethjnr0wmk" path="res://character/resources/camera_settings/camera_thirdperson.tres" id="3_fj6uk"]
+[ext_resource type="PackedScene" uid="uid://byviaf7ni73qp" path="res://ui/crosshair.tscn" id="5_hlfm5"]
 
 [node name="Main" type="Node3D"]
 
@@ -15,8 +17,7 @@ transform = Transform3D(0.999998, 0.00193988, -0.000959941, -0.00194208, 0.99999
 current = true
 script = ExtResource("2_btmad")
 FocusedEntity = NodePath("../Player")
-FocusOffset = Vector3(0, 1.7, 0)
-Distance = 2.0
+CameraSettings = ExtResource("3_fj6uk")
 
 [node name="LevelTesting" parent="." instance=ExtResource("1_1wx7x")]
 
@@ -25,3 +26,7 @@ transform = Transform3D(0.999102, 0.0410406, 0.0105305, -0.0403305, 0.844986, 0.
 shadow_enabled = true
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="Crosshair" parent="CanvasLayer" instance=ExtResource("5_hlfm5")]

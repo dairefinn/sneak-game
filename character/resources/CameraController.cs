@@ -7,15 +7,8 @@ public partial class CameraController : Camera3D
 	
 	public static CameraController Instance { get; private set; }
 
-	[ExportGroup("Positioning")]
 	[Export] public Node3D FocusedEntity { get; set; } = null;
-	[Export] private Vector3 FocusOffset = Vector3.Zero;
-	[Export] private float Distance = 0.0f;
-
-	[ExportGroup("Mouse input")]
-	[Export] public bool RotateWithMouseHorizontal { get; set; } = true;
-	[Export] public bool RotateWithMouseVertical { get; set; } = true;
-	[Export] public bool scrollToZoom { get; set; } = true;
+	[Export] public CameraSettings CameraSettings { get; set; }
 
 
 	private Vector3 FocusPoint = new(0, 0, 0);
@@ -53,17 +46,9 @@ public partial class CameraController : Camera3D
 			Rotation = new Vector3(Rotation.X, Rotation.Y, 0);
 		}
 
-		if (scrollToZoom)
+		if (@event is InputEventMouseButton mouseButton)
 		{
-			if (@event.IsActionPressed("zoom_in"))
-			{
-				Distance -= 0.1f;
-			}
-
-			if (@event.IsActionPressed("zoom_out"))
-			{
-				Distance += 0.1f;
-			}
+			ApplyMouseZoom(mouseButton);
 		}
     }
 
@@ -74,13 +59,13 @@ public partial class CameraController : Camera3D
 		if (FocusedEntity != null)
 		{
 			FocusPoint = FocusedEntity.GlobalPosition;
-			FocusPoint += FocusOffset;
+			FocusPoint += CameraSettings.FocusOffset;
 		}
 
 		Vector3 newPosition = FocusPoint;
 
 		// Apply the camera distance
-		newPosition += GlobalTransform.Basis.Z * Distance;
+		newPosition += GlobalTransform.Basis.Z * CameraSettings.Distance;
 
 		Position = newPosition;
 	}
@@ -88,7 +73,7 @@ public partial class CameraController : Camera3D
 	// This will rotate the camera around the focus point at the desired distance
 	public void ApplyMouseMovementHorizontal(InputEventMouseMotion mouseMotion)
 	{
-		if (!RotateWithMouseHorizontal) return;
+		if (!CameraSettings.RotateWithMouseHorizontal) return;
 
 		float rotateAmount = mouseMotion.Relative.X;
 		float rotateAmountRadians = Mathf.DegToRad(rotateAmount);
@@ -98,7 +83,7 @@ public partial class CameraController : Camera3D
 
 	public void ApplyMouseMovementVertical(InputEventMouseMotion mouseMotion)
 	{
-		if (!RotateWithMouseVertical) return;
+		if (!CameraSettings.RotateWithMouseVertical) return;
 
 		float ROTATION_LIMIT_DEGREES = 45;
 
@@ -125,6 +110,21 @@ public partial class CameraController : Camera3D
 				RotateObjectLocal(Vector3.Left, rotateAmountRadians);
 			}
 			return;
+		}
+	}
+
+	public void ApplyMouseZoom(InputEventMouseButton mouseMotion)
+	{
+		if (!CameraSettings.scrollToZoom) return;
+
+		if (mouseMotion.IsActionPressed("zoom_in"))
+		{
+			CameraSettings.Distance -= 0.1f;
+		}
+
+		if (mouseMotion.IsActionPressed("zoom_out"))
+		{
+			CameraSettings.Distance += 0.1f;
 		}
 	}
 }

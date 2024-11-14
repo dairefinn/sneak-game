@@ -88,17 +88,12 @@ public partial class Player : CharacterBody3D
 		velocity.X = movement.X;
 		velocity.Z = movement.Z;
 
-		if (desiredMovement.Y > 0 && IsOnFloor())
-		{
-			velocity = Jump(velocity, delta);
-		}
-		
-		if (desiredMovement.Y < 0)
-		{
-			velocity = Crouch(velocity, delta);
-		} else {
-			Hitbox.Scale = Vector3.One;
-		}
+        if (Input.IsActionPressed("move_jump") && IsOnFloor())
+        {
+            velocity = Jump(velocity, delta);
+        }
+
+		velocity = CrouchOrSlide(velocity, delta);
 
 		return velocity;
 	}
@@ -113,12 +108,24 @@ public partial class Player : CharacterBody3D
 		return velocity;
 	}
 
-	public Vector3 Crouch(Vector3 velocity, double delta)
+	public Vector3 CrouchOrSlide(Vector3 velocity, double delta)
 	{
-		if (IsOnFloor())
+		Vector3 newScale = Hitbox.Scale;
+
+        if (Input.IsActionPressed("move_crouch")) // && IsOnFloor() <-- Add this to prevent crouch jumping
+        {
+			newScale.Y = 0.5f;
+        } else {
+			newScale.Y = 1f;
+		}
+
+		// If the scale has changed, tween the scale to the new value
+		if (newScale.Y != Hitbox.Scale.Y)
 		{
-			velocity.Y = -CROUCH_HEIGHT;
-			Hitbox.Scale = new Vector3(1, 0.5f, 1);
+			Tween tween = CreateTween();
+			tween.SetTrans(Tween.TransitionType.Linear);
+			tween.TweenProperty(this, "scale", newScale, 0.025f);
+			tween.Play();
 		}
 
 		return velocity;
@@ -130,7 +137,6 @@ public partial class Player : CharacterBody3D
     /// 
     /// For example, when trying to move forward the resulting vector will be (0, 0, -1) and when trying to jump the resulting vector will be (0, 1, 0).
     /// </summary>
-	// TODO: This works fine but might need to be re-thought if we want crouch jumping or other more complex movement mechanics
     public static Vector3 GetDesiredMovementVector()
     {
         Vector3 movementVector = Vector3.Zero;
@@ -153,16 +159,6 @@ public partial class Player : CharacterBody3D
         if (Input.IsActionPressed("move_right"))
         {
             movementVector.X += 1;
-        }
-
-        if (Input.IsActionPressed("move_jump"))
-        {
-            movementVector.Y += 1;
-        }
-
-        if (Input.IsActionPressed("move_crouch"))
-        {
-            movementVector.Y -= 1;
         }
 
         movementVector = movementVector.Normalized();

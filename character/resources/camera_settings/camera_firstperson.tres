@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="CameraSettings" load_steps=2 format=3 uid="uid://d012crosrqjk0"]
+
+[ext_resource type="Script" path="res://character/resources/CameraSettings.cs" id="1_wootx"]
+
+[resource]
+script = ExtResource("1_wootx")
+FocusOffset = Vector3(0, 1.7, 0)
+Distance = 0.0
+RotateWithMouseHorizontal = true
+RotateWithMouseVertical = true
+scrollToZoom = false
