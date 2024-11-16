@@ -17,6 +17,8 @@ public partial class Player : CharacterBody3D
 		base._Ready();
 
 		Hitbox = GetNode<CollisionShape3D>("Hitbox");
+
+		MovementController.Initialize(this);
 	}
 
 
@@ -24,7 +26,21 @@ public partial class Player : CharacterBody3D
     {
         base._Process(delta);
 
-		MovementController.OnProcess(this, delta);
+		MovementController.OnProcess(delta);
     }
+
+	public void SetHitboxScaleY(float value)
+	{
+		if (Hitbox == null) return;
+		if (value == Hitbox.Scale.Y) return;
+
+		Vector3 newScale = Hitbox.Scale;
+		newScale.Y = value;
+
+		Tween tween = CreateTween();
+		tween.SetTrans(Tween.TransitionType.Linear);
+		tween.TweenProperty(Hitbox, "scale", newScale, 0.025f);
+		tween.Play();
+	}
 
 }

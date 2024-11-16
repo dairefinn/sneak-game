@@ -1,3 +1,5 @@
+#nullable enable
+
 namespace SneakGame;
 
 using Godot;
@@ -7,41 +9,82 @@ public partial class PlayerMovementController : Resource
 {
 
 	[ExportGroup("Physics")]
-    [Export] public int SPEED = 10;
-	[Export] public int DASH_MULTIPLIER = 2;
-    [Export] public int JUMP_HEIGHT = 5;
-    [Export] public int CROUCH_HEIGHT = 2;
+	[Export] public int SPEED = 10;
+	[Export] public int SLIDE_MULTIPLIER = 2;
+	[Export] public float SLIDE_DURATION = 5.0f;
+	[Export] public int JUMP_VELOCITY = 5;
+	[Export] public int CROUCH_HEIGHT = 2;
 	[Export] public bool AffectedByGravity { get; set; } = true;
 	[Export] public Vector3 GRAVITY_VECTOR = new(0, -9.8f, 0); // TODO: Replace with actual gravity value when I figure out where to put it
+	
+	[Export] public bool Crouching {
+		get => _crouching;
+		set => SetCrouching(value);
+	}
+	private bool _crouching = false;
 
-    public void OnProcess(Player player, double delta)
-    {
-        if(player == null) return;
+	[Export] public bool Sliding {
+		get => _sliding;
+		set => SetSliding(value);
+	}
+	private bool _sliding = false;
+
+	[Export] public bool Sprinting {
+		get => _sprinting;
+		set => SetSprinting(value);
+	}
+	private bool _sprinting = false;
+
+	[Export] public bool Jumping {
+		get => _jumping;
+		set => SetJumping(value);
+	}
+	private bool _jumping = false;
+
+
+
+	// TODO: Make this a Node3D export variable instead
+	private Player? Player;
+	
+	// TODO: Implement this
+	// private Node3D Hitbox;
+
+	private bool SlideDurationExpired = true;
+
+
+	public void Initialize(Player player)
+	{
+		Player = player;
+	}
+
+	public void OnProcess(double delta)
+	{
+		if(Player == null) return;
 
 		CameraController Camera = CameraController.Instance;
 		
 		Vector3 desiredMovement = GetDesiredMovementVector();
 		if (Camera != null)
 		{
+			// TODO: Move to Player.cs
 			if (Camera.FocusedEntity == null)
 			{
-				Camera.FocusedEntity = player;
+				Camera.FocusedEntity = Player;
 			}
 
 			// Movement is based on the direction of the camera.
 			// Eg - holding `move_left` will move towards the left of the camera and not the world origin
 			desiredMovement = desiredMovement.Rotated(Vector3.Up, Camera.Rotation.Y);
 
-			Vector3 newRotation = player.Rotation;
+			Vector3 newRotation = Player.Rotation;
 			newRotation.Y = Camera.Rotation.Y + Mathf.Pi;
-			player.Rotation = newRotation;
+			Player.Rotation = newRotation;
 		}
 		
-		ApplyPhysics(player, desiredMovement, delta);
+		ApplyPhysics(Player, desiredMovement, delta);
 
-		player.MoveAndSlide();
-    }
-
+		Player.MoveAndSlide();
+	}
 
 	private void ApplyPhysics(Player player, Vector3 desiredMovement, double delta)
 	{
@@ -76,90 +119,110 @@ public partial class PlayerMovementController : Resource
 		velocity.X = movement.X;
 		velocity.Z = movement.Z;
 
-		// NOTE: If slide is applied after the jump, it goes extra high. It might be a cool mechanic to have.
-		velocity = CrouchOrSlide(player, velocity, delta);
-
-        if (Input.IsActionPressed("move_jump") && player.IsOnFloor())
-        {
-            velocity = Jump(player, velocity, delta);
-        }
-
-		return velocity;
-	}
-
-	public Vector3 Jump(Player player, Vector3 velocity, double delta)
-	{
-		if (player.IsOnFloor())
+		if (Input.IsActionPressed("move_jump") && player.IsOnFloor())
 		{
-			velocity.Y = JUMP_HEIGHT;
+			Jumping = true;
 		}
 
-		return velocity;
-	}
-
-	public Vector3 CrouchOrSlide(Player player, Vector3 velocity, double delta)
-	{
-		Vector3 newScale = player.Hitbox.Scale;
-
-        if (Input.IsActionPressed("move_crouch")) // && IsOnFloor() <-- Add this to prevent crouch jumping
-        {
-			newScale.Y = 0.5f;
-
-			if (player.IsOnFloor())
-			{
-				Vector3 slideDirection = velocity.Normalized();
-				Vector3 slideVelocity = slideDirection * SPEED * DASH_MULTIPLIER;
-				velocity += slideVelocity;
-			}
-        } else {
-			newScale.Y = 1f;
-		}
-
-		// If the scale has changed, tween the scale to the new value
-		if (newScale.Y != player.Hitbox.Scale.Y)
+		if (Input.IsActionPressed("move_crouch"))
 		{
-			Tween tween = player.CreateTween();
-			tween.SetTrans(Tween.TransitionType.Linear);
-			tween.TweenProperty(player, "scale", newScale, 0.025f);
-			tween.Play();
+			Crouching = true;
+			Sliding = true;
+		}
+		else
+		{
+			Crouching = false;
+			Sliding = false;
 		}
 
 		return velocity;
 	}
 
-    /// <summary>
-    /// Returns a vector representing the desired movement direction based on the input event.
-    /// All values are normalized to -1, 0, or 1.
-    /// 
-    /// For example, when trying to move forward the resulting vector will be (0, 0, -1) and when trying to jump the resulting vector will be (0, 1, 0).
-    /// </summary>
-    public static Vector3 GetDesiredMovementVector()
-    {
-        Vector3 movementVector = Vector3.Zero;
+	public void SetCrouching(bool value)
+	{
+		_crouching = value;
 
-        if (Input.IsActionPressed("move_front"))
-        {
-            movementVector.Z -= 1;
-        }
+		float newScale = 1.0f;
 
-        if (Input.IsActionPressed("move_back"))
-        {
-            movementVector.Z += 1;
-        }
+		if (value == true)
+		{
+			newScale = 0.5f;
+		}
 
-        if (Input.IsActionPressed("move_left"))
-        {
-            movementVector.X -= 1;
-        }
+		Player?.SetHitboxScaleY(newScale);
+	}
 
-        if (Input.IsActionPressed("move_right"))
-        {
-            movementVector.X += 1;
-        }
+	private void SetSliding(bool value)
+	{
+		_sliding = value;
 
-        movementVector = movementVector.Normalized();
+		// Vector3 slideDirection = Player.Velocity.Normalized();
+		// Vector3 slideVelocity = slideDirection * SPEED * SLIDE_MULTIPLIER;
+		// Player.Velocity += slideVelocity;
 
-        return movementVector;
-    }
+		// if (value == true)
+		// {
+		// 	Player.GetTree().CreateTimer(SLIDE_DURATION, false).Timeout += () => {
+		// 		SlideDurationExpired = true;
+		// 	};
+		// }
+		// else
+		// {
+		// 	SlideDurationExpired = true;
+		// }
+	}
+
+	private void SetSprinting(bool value)
+	{
+
+	}
+
+	private void SetJumping(bool value)
+	{
+		_jumping = value;
+		
+		if (Player == null) return;
+		if (value == false) return;
+
+		GD.Print("Jumping");
+		Vector3 velocity = Player.Velocity;
+		velocity.Y += JUMP_VELOCITY;
+		Player.Velocity = velocity;
+	}
+
+	/// <summary>
+	/// Returns a vector representing the desired movement direction based on the input event.
+	/// All values are normalized to -1, 0, or 1.
+	/// 
+	/// For example, when trying to move forward the resulting vector will be (0, 0, -1) and when trying to jump the resulting vector will be (0, 1, 0).
+	/// </summary>
+	public static Vector3 GetDesiredMovementVector()
+	{
+		Vector3 movementVector = Vector3.Zero;
+
+		if (Input.IsActionPressed("move_front"))
+		{
+			movementVector.Z -= 1;
+		}
+
+		if (Input.IsActionPressed("move_back"))
+		{
+			movementVector.Z += 1;
+		}
+
+		if (Input.IsActionPressed("move_left"))
+		{
+			movementVector.X -= 1;
+		}
+
+		if (Input.IsActionPressed("move_right"))
+		{
+			movementVector.X += 1;
+		}
+
+		movementVector = movementVector.Normalized();
+
+		return movementVector;
+	}
 
 }

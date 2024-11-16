@@ -2,18 +2,23 @@
 
 [ext_resource type="Texture2D" uid="uid://cwxei8a6go64u" path="res://assets/medival_people/texture/people_texture_map.png" id="1_3dm7d"]
 [ext_resource type="Script" path="res://character/scenes/Player.cs" id="1_tygo0"]
+[ext_resource type="Script" path="res://character/resources/PlayerMovementController.cs" id="2_qoodr"]
 [ext_resource type="Script" path="res://character/resources/CharacterAttributes.cs" id="2_rdnnt"]
 [ext_resource type="Script" path="res://character/resources/CharacterStats.cs" id="3_mw5w3"]
-[ext_resource type="Script" path="res://character/resources/PlayerMovementController.cs" id="5_outss"]
 
-[sub_resource type="Resource" id="Resource_yhia1"]
-script = ExtResource("5_outss")
+[sub_resource type="Resource" id="Resource_ow5qc"]
+script = ExtResource("2_qoodr")
 SPEED = 10
-DASH_MULTIPLIER = 2
-JUMP_HEIGHT = 5
+SLIDE_MULTIPLIER = 2
+SLIDE_DURATION = 5.0
+JUMP_VELOCITY = 5
 CROUCH_HEIGHT = 2
 AffectedByGravity = true
 GRAVITY_VECTOR = Vector3(0, -9.8, 0)
+Crouching = false
+Sliding = false
+Sprinting = false
+Jumping = false
 
 [sub_resource type="Resource" id="Resource_wg32u"]
 script = ExtResource("2_rdnnt")
@@ -192,7 +197,7 @@ height = 1.75683
 [node name="Player" type="CharacterBody3D"]
 collision_mask = 3
 script = ExtResource("1_tygo0")
-MovementController = SubResource("Resource_yhia1")
+MovementController = SubResource("Resource_ow5qc")
 Stats = SubResource("Resource_rbstw")
 
 [node name="Armature" type="Node3D" parent="."]
