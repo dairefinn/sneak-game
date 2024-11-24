@@ -10,11 +10,10 @@ public partial class NonPlayerAction : Resource
     [Export] public string ActionDescription { get; set; } = string.Empty;
     [Export] public int ActionCost { get; set; } = 0;
 
-    public virtual bool Execute(NonPlayerBrain owner)
+    public virtual bool Execute(NonPlayerBrain owner, double delta)
     {
         if (!CanExecute(owner)) return false;
 
-        GD.Print("Executing action: " + ActionName);
         return true;
     }
 

@@ -1,4 +1,4 @@
-[gd_scene load_steps=18 format=3 uid="uid://bajf0rhqebn0r"]
+[gd_scene load_steps=16 format=3 uid="uid://bajf0rhqebn0r"]
 
 [ext_resource type="PackedScene" uid="uid://dksfr8nd8sx31" path="res://world/levels/level_testing/level_testing.tscn" id="1_1wx7x"]
 [ext_resource type="PackedScene" uid="uid://di33ivj0tqhie" path="res://character/player/player.tscn" id="2_8hm8e"]
@@ -12,16 +12,9 @@
 [ext_resource type="Script" path="res://character/non_player/decision_making/NonPlayerBrain.cs" id="10_aft7t"]
 [ext_resource type="Resource" uid="uid://ba5hq3vto876o" path="res://character/data/military_general.tres" id="10_bw8g1"]
 [ext_resource type="Resource" uid="uid://8twbhkd4qchr" path="res://character/data/testing_soldier.tres" id="11_5d3eo"]
-[ext_resource type="Script" path="res://character/non_player/decision_making/actions/resources/NonPlayerAction.cs" id="11_y88tr"]
 [ext_resource type="Resource" uid="uid://c5eqt0c0xx184" path="res://character/data/bandit_kingpin.tres" id="12_n7xl6"]
 [ext_resource type="Resource" uid="uid://bg0l6lakcb0l4" path="res://character/non_player/decision_making/actions/npc_action_run.tres" id="12_uxal3"]
 [ext_resource type="Resource" uid="uid://bc2mgcu06ksqk" path="res://character/non_player/decision_making/actions/npc_action_walk.tres" id="13_704wf"]
-
-[sub_resource type="Resource" id="Resource_4sd1v"]
-script = ExtResource("11_y88tr")
-ActionName = "Idle"
-ActionDescription = "Stand still, do nothing"
-ActionCost = 0
 
 [node name="Main" type="Node3D"]
 
@@ -50,6 +43,7 @@ PlayerScene = ExtResource("2_8hm8e")
 [node name="Crosshair" parent="CanvasLayer" instance=ExtResource("5_hlfm5")]
 
 [node name="LevelTesting" parent="." instance=ExtResource("1_1wx7x")]
+collision_mask = 0
 
 [node name="NonPlayer" parent="." node_paths=PackedStringArray("Brain") instance=ExtResource("8_pgai2")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.05128, 0.696493, -3.57611)
@@ -58,21 +52,27 @@ Brain = NodePath("Brain")
 
 [node name="Brain" type="Node" parent="NonPlayer"]
 script = ExtResource("10_aft7t")
-PossibleActions = [SubResource("Resource_4sd1v"), ExtResource("12_uxal3"), ExtResource("13_704wf")]
+PossibleActions = [ExtResource("12_uxal3"), ExtResource("13_704wf")]
 CurrentAction = ExtResource("13_704wf")
-TargetPosition = Vector3(29.0584, 0.4731, 18.291)
+TargetPosition = Vector3(26.113, 0.473, 20.691)
 
-[node name="NonPlayer2" parent="." instance=ExtResource("8_pgai2")]
+[node name="NonPlayer2" parent="." node_paths=PackedStringArray("Brain") instance=ExtResource("8_pgai2")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.696, 0.696495, -3.57631)
 Character = ExtResource("10_bw8g1")
+Brain = NodePath("Brain")
 
-[node name="NonPlayer3" parent="." instance=ExtResource("8_pgai2")]
+[node name="Brain" type="Node" parent="NonPlayer2"]
+script = ExtResource("10_aft7t")
+PossibleActions = [ExtResource("12_uxal3"), ExtResource("13_704wf")]
+CurrentAction = ExtResource("12_uxal3")
+TargetPosition = Vector3(26.113, 0.473, 20.691)
+
+[node name="NonPlayer3" parent="." node_paths=PackedStringArray("Brain") instance=ExtResource("8_pgai2")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12.7704, 0.696495, -3.57631)
 Character = ExtResource("11_5d3eo")
+Brain = NodePath("")
 
-[node name="NonPlayer4" parent="." instance=ExtResource("8_pgai2")]
+[node name="NonPlayer4" parent="." node_paths=PackedStringArray("Brain") instance=ExtResource("8_pgai2")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17.9187, 0.696495, -3.57631)
 Character = ExtResource("12_n7xl6")
-
-[node name="Node3D" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 29.0584, 0.4731, 18.291)
+Brain = NodePath("")

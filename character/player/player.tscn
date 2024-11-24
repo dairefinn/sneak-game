@@ -165,7 +165,7 @@ radius = 0.387293
 height = 1.75683
 
 [node name="Player" type="CharacterBody3D" node_paths=PackedStringArray("MovementController", "Hitbox")]
-collision_mask = 3
+collision_layer = 2
 script = ExtResource("1_tygo0")
 Character = ExtResource("2_xhqsc")
 MovementController = NodePath("MovementController")

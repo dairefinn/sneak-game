@@ -18,7 +18,7 @@ public partial class NonPlayerBrain : Node
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
 	public override void _Process(double delta)
 	{
-		TryPerformCurrentAction();
+		TryPerformCurrentAction(delta);
 	}
 
 	public void Initialize(NonPlayer nonPlayer)
@@ -26,11 +26,18 @@ public partial class NonPlayerBrain : Node
 		NonPlayer = nonPlayer;
 	}
 
-	public void TryPerformCurrentAction()
+	public void TryPerformCurrentAction(double delta)
 	{
 		if (CurrentAction == null) return;
 
-		CurrentAction.Execute(this);
+		CurrentAction.Execute(this, delta);
+	}
+
+	public void ClearAction()
+	{
+		CurrentAction = null;
+		TargetPosition = Vector3.Zero;
+		TargetNode = null;
 	}
 
 }

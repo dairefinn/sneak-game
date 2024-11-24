@@ -5,30 +5,42 @@ using Godot;
 public partial class NpcActionWalk : NonPlayerAction
 {
 
-    public override bool Execute(NonPlayerBrain owner)
+    [Export] public float WalkSpeed = 10;
+
+    private double timeWithoutMoving = 0;
+    private Vector3? lastPosition = null;
+
+    public override bool Execute(NonPlayerBrain owner, double delta)
     {
-        bool success = base.Execute(owner);
+        bool success = base.Execute(owner, delta);
         if (!success) return false;
 
-        if (owner.TargetPosition == owner.NonPlayer.GlobalTransform.Origin)
+        if (lastPosition != null)
         {
-            // owner.TargetPosition = Vector3.Zero;
-            // owner.CurrentAction = null;
+            Vector3 distanceMoved = (owner.NonPlayer.GlobalTransform.Origin - lastPosition).Value;
+            if (distanceMoved.Length() <= 0.1f)
+            {
+                timeWithoutMoving += delta;
+                if (timeWithoutMoving >= 5)
+                {
+                    NpcActionUtilities.GetNewRandomPositionOnMap(owner);
+                    timeWithoutMoving = 0;
+                }
+            }
+            else
+            {
+                timeWithoutMoving = 0;
+            }
+        }
+
+        if ((owner.TargetPosition - owner.NonPlayer.GlobalTransform.Origin).Length() <= 5 || timeWithoutMoving >= 5)
+        {
+            NpcActionUtilities.GetNewRandomPositionOnMap(owner);
             return false;
         }
 
-        // Start moving towards the target position
-        owner.NonPlayer.Velocity = owner.TargetPosition - owner.NonPlayer.GlobalTransform.Origin;
-
-        // Face the target position if not already facing it
-        if (owner.NonPlayer.Velocity.Length() > 0.1f)
-        {
-            Vector3 direction = owner.NonPlayer.Position - owner.TargetPosition;
-            owner.NonPlayer.LookAt(owner.NonPlayer.Position + direction, Vector3.Up);
-        }
-
-        // Apply movement
-        owner.NonPlayer.MoveAndSlide();
+        lastPosition = owner.NonPlayer.GlobalTransform.Origin;
+        NpcActionUtilities.MoveToPoint(owner, WalkSpeed);
 
         return true;
     }
