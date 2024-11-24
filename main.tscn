@@ -42,3 +42,7 @@ collision_mask = 0
 [node name="NonPlayer" parent="." instance=ExtResource("8_pgai2")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.05128, 0.696493, -3.57611)
 Character = ExtResource("9_kryet")
+
+[node name="NonPlayer2" parent="." instance=ExtResource("8_pgai2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.05128, 0.696493, -5.8518)
+Character = ExtResource("9_kryet")

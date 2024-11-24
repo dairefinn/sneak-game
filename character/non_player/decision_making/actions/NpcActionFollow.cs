@@ -14,10 +14,10 @@ public partial class NpcActionFollow : NonPlayerAction
         bool success = base.Execute(owner, delta);
         if (!success) return false;
 
-        if (owner._detectedBodies.Count > 0)
+        Node3D newTarget = owner.GetFirstDetectedBody<Player>();
+        if (newTarget != null)
         {
-            GD.Print("Following detected body: " + owner._detectedBodies[0].Name);
-            _target = owner._detectedBodies[0];
+            _target = newTarget;
         }
 
         if (_target == null) return false;
@@ -27,11 +27,6 @@ public partial class NpcActionFollow : NonPlayerAction
         owner.NonPlayer.MovementContoller.MovementSpeed = FollowSpeed;
 
         return true;
-    }
-
-    public override bool CanExecute(NonPlayerBrain owner)
-    {
-        return base.CanExecute(owner);
     }
 
 }

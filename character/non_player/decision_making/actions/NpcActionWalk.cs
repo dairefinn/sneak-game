@@ -36,19 +36,15 @@ public partial class NpcActionWalk : NonPlayerAction
 
         // lastPosition = owner.NonPlayer.GlobalTransform.Origin;
 
-        if (owner._detectedBodies.Count > 0)
+        Node3D newTarget = owner.GetFirstDetectedBody<Player>();
+        if (newTarget != null)
         {
-            owner.NonPlayer.MovementContoller.TargetPosition = owner._detectedBodies[0].GlobalTransform.Origin;
+            owner.NonPlayer.MovementContoller.TargetPosition = newTarget.GlobalTransform.Origin;
         }
 
         owner.NonPlayer.MovementContoller.MovementSpeed = WalkSpeed;
 
         return true;
-    }
-
-    public override bool CanExecute(NonPlayerBrain owner)
-    {
-        return base.CanExecute(owner);
     }
 
 }
