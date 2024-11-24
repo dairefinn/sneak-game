@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="Faction" load_steps=2 format=3 uid="uid://c40bp6fsohvmc"]
+
+[ext_resource type="Script" path="res://world/factions/resources/Faction.cs" id="1_ajgwh"]
+
+[resource]
+script = ExtResource("1_ajgwh")
+Name = "Cultists"
+Color = Color(0.6, 0.18, 0.9, 1)

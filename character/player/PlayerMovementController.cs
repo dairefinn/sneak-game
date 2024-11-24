@@ -1,12 +1,11 @@
-#nullable enable
-
 namespace SneakGame;
 
 using Godot;
 
-[GlobalClass]
-public partial class PlayerMovementController : Resource
+public partial class PlayerMovementController : Node
 {
+
+	private Player _player;
 
 	[ExportGroup("Physics")]
 	[Export] public int SPEED = 10;
@@ -42,24 +41,17 @@ public partial class PlayerMovementController : Resource
 	private bool _jumping = false;
 
 
-
-	// TODO: Make this a Node3D export variable instead
-	private Player? Player;
-	
-	// TODO: Implement this
-	// private Node3D Hitbox;
-
 	private bool SlideDurationExpired = true;
 
 
 	public void Initialize(Player player)
 	{
-		Player = player;
+		_player = player;
 	}
 
-	public void OnProcess(double delta)
+	public override void _Process(double delta)
 	{
-		if(Player == null) return;
+		if(_player == null) return;
 
 		CameraController Camera = CameraController.Instance;
 		
@@ -69,38 +61,38 @@ public partial class PlayerMovementController : Resource
 			// TODO: Move to Player.cs
 			if (Camera.FocusedEntity == null)
 			{
-				Camera.FocusedEntity = Player;
+				Camera.FocusedEntity = _player;
 			}
 
 			// Movement is based on the direction of the camera.
 			// Eg - holding `move_left` will move towards the left of the camera and not the world origin
 			desiredMovement = desiredMovement.Rotated(Vector3.Up, Camera.Rotation.Y);
 
-			Vector3 newRotation = Player.Rotation;
+			Vector3 newRotation = _player.Rotation;
 			newRotation.Y = Camera.Rotation.Y + Mathf.Pi;
-			Player.Rotation = newRotation;
+			_player.Rotation = newRotation;
 		}
 		
-		ApplyPhysics(Player, desiredMovement, delta);
+		ApplyPhysics(desiredMovement, delta);
 
-		Player.MoveAndSlide();
+		_player.MoveAndSlide();
 	}
 
-	private void ApplyPhysics(Player player, Vector3 desiredMovement, double delta)
+	private void ApplyPhysics(Vector3 desiredMovement, double delta)
 	{
-		Vector3 newVelocity = player.Velocity;
+		Vector3 newVelocity = _player.Velocity;
 
-		newVelocity = ApplyGravity(player, newVelocity, delta);
-		newVelocity = ApplyMovement(player, desiredMovement, newVelocity, delta);
+		newVelocity = ApplyGravity(newVelocity, delta);
+		newVelocity = ApplyMovement(desiredMovement, newVelocity, delta);
 
-		player.Velocity = newVelocity;
+		_player.Velocity = newVelocity;
 	}
 
-	private Vector3 ApplyGravity(Player player, Vector3 velocity, double delta)
+	private Vector3 ApplyGravity(Vector3 velocity, double delta)
 	{
 		if (!AffectedByGravity) return velocity;
 
-		if (player.IsOnFloor())
+		if (_player.IsOnFloor())
 		{
 			velocity.Y = 0;
 		}
@@ -112,14 +104,14 @@ public partial class PlayerMovementController : Resource
 		return velocity;
 	}
 
-	public Vector3 ApplyMovement(Player player, Vector3 desiredMovement, Vector3 velocity, double delta)
+	public Vector3 ApplyMovement(Vector3 desiredMovement, Vector3 velocity, double delta)
 	{
 		Vector3 movement = desiredMovement * SPEED;
 
 		velocity.X = movement.X;
 		velocity.Z = movement.Z;
 
-		if (Input.IsActionPressed("move_jump") && player.IsOnFloor())
+		if (Input.IsActionPressed("move_jump") && _player.IsOnFloor())
 		{
 			Jumping = true;
 		}
@@ -149,7 +141,21 @@ public partial class PlayerMovementController : Resource
 			newScale = 0.5f;
 		}
 
-		Player?.SetHitboxScaleY(newScale);
+		SetHitboxScaleY(newScale);
+	}
+	
+	public void SetHitboxScaleY(float value)
+	{
+		if (_player.Hitbox == null) return;
+		if (value == _player.Hitbox.Scale.Y) return;
+
+		Vector3 newScale = _player.Hitbox.Scale;
+		newScale.Y = value;
+
+		Tween tween = CreateTween();
+		tween.SetTrans(Tween.TransitionType.Linear);
+		tween.TweenProperty(_player.Hitbox, "scale", newScale, 0.025f);
+		tween.Play();
 	}
 
 	private void SetSliding(bool value)
@@ -181,13 +187,13 @@ public partial class PlayerMovementController : Resource
 	{
 		_jumping = value;
 		
-		if (Player == null) return;
+		if (_player == null) return;
 		if (value == false) return;
 
 		GD.Print("Jumping");
-		Vector3 velocity = Player.Velocity;
+		Vector3 velocity = _player.Velocity;
 		velocity.Y += JUMP_VELOCITY;
-		Player.Velocity = velocity;
+		_player.Velocity = velocity;
 	}
 
 	/// <summary>

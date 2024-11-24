@@ -1,6 +1,6 @@
 [gd_scene load_steps=8 format=3 uid="uid://dksfr8nd8sx31"]
 
-[ext_resource type="PackedScene" uid="uid://dgcbwywcy3jts" path="res://world/spawn_point.tscn" id="1_ufn8s"]
+[ext_resource type="PackedScene" uid="uid://dgcbwywcy3jts" path="res://world/spawning/spawn_point/spawn_point.tscn" id="1_ufn8s"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_vi3x2"]
 size = Vector3(100, 1, 100)

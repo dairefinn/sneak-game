@@ -1,0 +1,33 @@
+[gd_resource type="Resource" script_class="Character" load_steps=9 format=3 uid="uid://ba5hq3vto876o"]
+
+[ext_resource type="Script" path="res://character/resources/Character.cs" id="1_3fahd"]
+[ext_resource type="Script" path="res://character/resources/CharacterAttributes.cs" id="1_72b5k"]
+[ext_resource type="Resource" uid="uid://8h1as1seyrn8" path="res://world/factions/military.tres" id="2_ffnh3"]
+[ext_resource type="Script" path="res://character/resources/CharacterRelations.cs" id="3_0gjvy"]
+[ext_resource type="Script" path="res://character/resources/CharacterStats.cs" id="4_3ilvo"]
+
+[sub_resource type="Resource" id="Resource_7na5i"]
+script = ExtResource("1_72b5k")
+Strength = 10
+Dexterity = 6
+Intelligence = 5
+Vitality = 8
+
+[sub_resource type="Resource" id="Resource_p80sh"]
+script = ExtResource("3_0gjvy")
+Faction = ExtResource("2_ffnh3")
+
+[sub_resource type="Resource" id="Resource_yo1bn"]
+script = ExtResource("4_3ilvo")
+CurrentHealth = 100
+MaxHealth = 100
+CurrentStamina = 100
+MaxStamina = 100
+
+[resource]
+script = ExtResource("1_3fahd")
+Name = ""
+Description = ""
+Attributes = SubResource("Resource_7na5i")
+Stats = SubResource("Resource_yo1bn")
+Relations = SubResource("Resource_p80sh")

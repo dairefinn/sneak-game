@@ -1,26 +1,12 @@
-[gd_scene load_steps=14 format=4 uid="uid://di33ivj0tqhie"]
+[gd_scene load_steps=13 format=4 uid="uid://di33ivj0tqhie"]
 
 [ext_resource type="Texture2D" uid="uid://cwxei8a6go64u" path="res://assets/medival_people/texture/people_texture_map.png" id="1_3dm7d"]
-[ext_resource type="Script" path="res://character/scenes/Player.cs" id="1_tygo0"]
-[ext_resource type="Script" path="res://character/resources/PlayerMovementController.cs" id="2_qoodr"]
+[ext_resource type="Script" path="res://character/player/Player.cs" id="1_tygo0"]
+[ext_resource type="Script" path="res://character/player/PlayerMovementController.cs" id="2_qoodr"]
 [ext_resource type="Script" path="res://character/resources/CharacterAttributes.cs" id="2_rdnnt"]
 [ext_resource type="Script" path="res://character/resources/CharacterStats.cs" id="3_mw5w3"]
 
-[sub_resource type="Resource" id="Resource_ow5qc"]
-script = ExtResource("2_qoodr")
-SPEED = 10
-SLIDE_MULTIPLIER = 2
-SLIDE_DURATION = 5.0
-JUMP_VELOCITY = 5
-CROUCH_HEIGHT = 2
-AffectedByGravity = true
-GRAVITY_VECTOR = Vector3(0, -9.8, 0)
-Crouching = false
-Sliding = false
-Sprinting = false
-Jumping = false
-
-[sub_resource type="Resource" id="Resource_wg32u"]
+[sub_resource type="Resource" id="Resource_4ic7e"]
 script = ExtResource("2_rdnnt")
 Strength = 1
 Dexterity = 1
@@ -33,7 +19,6 @@ CurrentHealth = 100
 MaxHealth = 100
 CurrentStamina = 100
 MaxStamina = 100
-Attributes = SubResource("Resource_wg32u")
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_7atnd"]
 albedo_texture = ExtResource("1_3dm7d")
@@ -194,11 +179,12 @@ bind/40/pose = Transform3D(1, -3.04575e-05, -3.55579e-07, -1.2583e-05, -0.402303
 radius = 0.387293
 height = 1.75683
 
-[node name="Player" type="CharacterBody3D"]
+[node name="Player" type="CharacterBody3D" node_paths=PackedStringArray("Hitbox")]
 collision_mask = 3
 script = ExtResource("1_tygo0")
-MovementController = SubResource("Resource_ow5qc")
+Attributes = SubResource("Resource_4ic7e")
 Stats = SubResource("Resource_rbstw")
+Hitbox = NodePath("Hitbox")
 
 [node name="Armature" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, -4.37114e-08, 0, 4.37114e-08, 1, 0, 0, 0)
@@ -500,3 +486,6 @@ skin = SubResource("Skin_wh8bf")
 [node name="Hitbox" type="CollisionShape3D" parent="."]
 transform = Transform3D(1.00744, 0, 0, 0, 1.00744, 0, 0, 0, 1.00744, 0, 0.88874, 0)
 shape = SubResource("CapsuleShape3D_4d760")
+
+[node name="Node" type="Node" parent="."]
+script = ExtResource("2_qoodr")

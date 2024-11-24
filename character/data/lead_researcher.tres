@@ -1,0 +1,33 @@
+[gd_resource type="Resource" script_class="Character" load_steps=9 format=3 uid="uid://dae7g51jfv2nn"]
+
+[ext_resource type="Script" path="res://character/resources/CharacterAttributes.cs" id="1_gfvef"]
+[ext_resource type="Script" path="res://character/resources/Character.cs" id="1_kysu3"]
+[ext_resource type="Resource" uid="uid://bwrco8ojw8kx8" path="res://world/factions/scientists.tres" id="2_edt8x"]
+[ext_resource type="Script" path="res://character/resources/CharacterRelations.cs" id="3_p5g37"]
+[ext_resource type="Script" path="res://character/resources/CharacterStats.cs" id="4_ybuwe"]
+
+[sub_resource type="Resource" id="Resource_dnrm3"]
+script = ExtResource("1_gfvef")
+Strength = 1
+Dexterity = 1
+Intelligence = 1
+Vitality = 1
+
+[sub_resource type="Resource" id="Resource_uc4ng"]
+script = ExtResource("3_p5g37")
+Faction = ExtResource("2_edt8x")
+
+[sub_resource type="Resource" id="Resource_68784"]
+script = ExtResource("4_ybuwe")
+CurrentHealth = 100
+MaxHealth = 100
+CurrentStamina = 100
+MaxStamina = 100
+
+[resource]
+script = ExtResource("1_kysu3")
+Name = ""
+Description = ""
+Attributes = SubResource("Resource_dnrm3")
+Stats = SubResource("Resource_68784")
+Relations = SubResource("Resource_uc4ng")

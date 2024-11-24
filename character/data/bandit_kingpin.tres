@@ -1,0 +1,31 @@
+[gd_resource type="Resource" script_class="Character" load_steps=9 format=3 uid="uid://c5eqt0c0xx184"]
+
+[ext_resource type="Script" path="res://character/resources/CharacterAttributes.cs" id="1_3x14c"]
+[ext_resource type="Script" path="res://character/resources/Character.cs" id="1_73uod"]
+[ext_resource type="Resource" uid="uid://btt40xm8n2yqo" path="res://world/factions/bandits.tres" id="2_dmnwc"]
+[ext_resource type="Script" path="res://character/resources/CharacterRelations.cs" id="3_1ulgf"]
+[ext_resource type="Script" path="res://character/resources/CharacterStats.cs" id="4_vc2cf"]
+
+[sub_resource type="Resource" id="Resource_auwb5"]
+script = ExtResource("1_3x14c")
+Strength = 1
+Dexterity = 1
+Intelligence = 1
+Vitality = 1
+
+[sub_resource type="Resource" id="Resource_1nml1"]
+script = ExtResource("3_1ulgf")
+Faction = ExtResource("2_dmnwc")
+
+[sub_resource type="Resource" id="Resource_m6gap"]
+script = ExtResource("4_vc2cf")
+CurrentHealth = 100
+MaxHealth = 100
+CurrentStamina = 100
+MaxStamina = 100
+
+[resource]
+script = ExtResource("1_73uod")
+Attributes = SubResource("Resource_auwb5")
+Stats = SubResource("Resource_m6gap")
+Relations = SubResource("Resource_1nml1")

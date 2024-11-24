@@ -1,12 +1,27 @@
-[gd_scene load_steps=8 format=3 uid="uid://bajf0rhqebn0r"]
+[gd_scene load_steps=18 format=3 uid="uid://bajf0rhqebn0r"]
 
 [ext_resource type="PackedScene" uid="uid://dksfr8nd8sx31" path="res://world/levels/level_testing/level_testing.tscn" id="1_1wx7x"]
-[ext_resource type="PackedScene" uid="uid://di33ivj0tqhie" path="res://character/scenes/player.tscn" id="2_8hm8e"]
-[ext_resource type="Script" path="res://character/resources/CameraController.cs" id="2_btmad"]
-[ext_resource type="Resource" uid="uid://cisethjnr0wmk" path="res://character/resources/camera_settings/camera_thirdperson.tres" id="3_fj6uk"]
-[ext_resource type="Script" path="res://world/LevelHandler.cs" id="4_g887l"]
+[ext_resource type="PackedScene" uid="uid://di33ivj0tqhie" path="res://character/player/player.tscn" id="2_8hm8e"]
+[ext_resource type="Script" path="res://character/camera/CameraController.cs" id="2_btmad"]
+[ext_resource type="Resource" uid="uid://cisethjnr0wmk" path="res://character/camera/camera_settings/camera_thirdperson.tres" id="3_fj6uk"]
+[ext_resource type="Script" path="res://world/levels/LevelHandler.cs" id="4_g887l"]
 [ext_resource type="PackedScene" uid="uid://byviaf7ni73qp" path="res://ui/crosshair.tscn" id="5_hlfm5"]
-[ext_resource type="Script" path="res://world/SpawningHandler.cs" id="6_cr3jo"]
+[ext_resource type="Script" path="res://world/spawning/SpawningHandler.cs" id="6_cr3jo"]
+[ext_resource type="PackedScene" uid="uid://b8cokptk8xr4f" path="res://character/non_player/NonPlayer.tscn" id="8_pgai2"]
+[ext_resource type="Resource" uid="uid://dae7g51jfv2nn" path="res://character/data/lead_researcher.tres" id="9_kryet"]
+[ext_resource type="Script" path="res://character/non_player/decision_making/NonPlayerBrain.cs" id="10_aft7t"]
+[ext_resource type="Resource" uid="uid://ba5hq3vto876o" path="res://character/data/military_general.tres" id="10_bw8g1"]
+[ext_resource type="Resource" uid="uid://8twbhkd4qchr" path="res://character/data/testing_soldier.tres" id="11_5d3eo"]
+[ext_resource type="Script" path="res://character/non_player/decision_making/actions/resources/NonPlayerAction.cs" id="11_y88tr"]
+[ext_resource type="Resource" uid="uid://c5eqt0c0xx184" path="res://character/data/bandit_kingpin.tres" id="12_n7xl6"]
+[ext_resource type="Resource" uid="uid://bg0l6lakcb0l4" path="res://character/non_player/decision_making/actions/npc_action_run.tres" id="12_uxal3"]
+[ext_resource type="Resource" uid="uid://bc2mgcu06ksqk" path="res://character/non_player/decision_making/actions/npc_action_walk.tres" id="13_704wf"]
+
+[sub_resource type="Resource" id="Resource_4sd1v"]
+script = ExtResource("11_y88tr")
+ActionName = "Idle"
+ActionDescription = "Stand still, do nothing"
+ActionCost = 0
 
 [node name="Main" type="Node3D"]
 
@@ -22,12 +37,42 @@ shadow_enabled = true
 
 [node name="LevelHandler" type="Node" parent="."]
 script = ExtResource("4_g887l")
+Enabled = false
 DefaultScene = ExtResource("1_1wx7x")
 
 [node name="SpawningHandler" type="Node" parent="."]
 script = ExtResource("6_cr3jo")
+Enabled = false
 PlayerScene = ExtResource("2_8hm8e")
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 
 [node name="Crosshair" parent="CanvasLayer" instance=ExtResource("5_hlfm5")]
+
+[node name="LevelTesting" parent="." instance=ExtResource("1_1wx7x")]
+
+[node name="NonPlayer" parent="." node_paths=PackedStringArray("Brain") instance=ExtResource("8_pgai2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.05128, 0.696493, -3.57611)
+Character = ExtResource("9_kryet")
+Brain = NodePath("Brain")
+
+[node name="Brain" type="Node" parent="NonPlayer"]
+script = ExtResource("10_aft7t")
+PossibleActions = [SubResource("Resource_4sd1v"), ExtResource("12_uxal3"), ExtResource("13_704wf")]
+CurrentAction = ExtResource("13_704wf")
+TargetPosition = Vector3(29.0584, 0.4731, 18.291)
+
+[node name="NonPlayer2" parent="." instance=ExtResource("8_pgai2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.696, 0.696495, -3.57631)
+Character = ExtResource("10_bw8g1")
+
+[node name="NonPlayer3" parent="." instance=ExtResource("8_pgai2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12.7704, 0.696495, -3.57631)
+Character = ExtResource("11_5d3eo")
+
+[node name="NonPlayer4" parent="." instance=ExtResource("8_pgai2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17.9187, 0.696495, -3.57631)
+Character = ExtResource("12_n7xl6")
+
+[node name="Node3D" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 29.0584, 0.4731, 18.291)

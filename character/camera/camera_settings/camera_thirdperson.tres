@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="CameraSettings" load_steps=2 format=3 uid="uid://cisethjnr0wmk"]
 
-[ext_resource type="Script" path="res://character/resources/CameraSettings.cs" id="1_gc44s"]
+[ext_resource type="Script" path="res://character/camera/CameraSettings.cs" id="1_gc44s"]
 
 [resource]
 script = ExtResource("1_gc44s")

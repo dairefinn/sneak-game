@@ -6,6 +6,7 @@ using Godot;
 public partial class SpawningHandler : Node
 {
 
+    [Export] public bool Enabled { get; set; } = true;
     [Export] public PackedScene PlayerScene { get; set; }
 
     public override void _Ready()
@@ -13,15 +14,27 @@ public partial class SpawningHandler : Node
         SpawnPlayer();
     }
 
-    private void SpawnPlayer()
+    private void Initialize()
     {
-        Node3D spawnPoint = GetRandomSpawnPoint();
-        CallDeferred(MethodName.CreatePlayerAt, spawnPoint.GlobalPosition);
+        if (!Enabled) return;
+        GD.Print("Initializing SpawningHandler");
+        SpawnPlayer();
     }
 
-    private Node3D GetRandomSpawnPoint()
+    private void SpawnPlayer()
     {
-        var spawnPoints = GetTree().GetNodesInGroup("spawn_points").OfType<Node3D>().ToList();
+        SpawnPoint spawnPoint = GetRandomSpawnPoint();
+        if (spawnPoint != null)
+        {
+            CallDeferred(MethodName.CreatePlayerAt, spawnPoint.GlobalPosition);
+        }
+    }
+
+    private SpawnPoint GetRandomSpawnPoint()
+    {
+        var spawnPoints = GetTree().GetNodesInGroup("spawn_points").OfType<SpawnPoint>().ToList();
+
+        GD.Print("Found spawn points: " + spawnPoints.Count);
 
         if (spawnPoints.Count == 0)
         {

@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="Faction" load_steps=2 format=3 uid="uid://bwrco8ojw8kx8"]
+
+[ext_resource type="Script" path="res://world/factions/resources/Faction.cs" id="1_cx8ek"]
+
+[resource]
+script = ExtResource("1_cx8ek")
+Name = "Scientist"
+Color = Color(0.18, 0.42, 0.9, 1)

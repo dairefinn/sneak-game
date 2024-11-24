@@ -1,3 +1,0 @@
-[gd_scene format=3 uid="uid://dgcbwywcy3jts"]
-
-[node name="SpawnPoint" type="Node3D" groups=["spawn_points"]]
