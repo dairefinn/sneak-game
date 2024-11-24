@@ -11,8 +11,8 @@ public partial class PlayerMovementController : Node
 
 	[ExportGroup("Physics")]
 	[Export] public int SPEED = 10;
-	[Export] public int SLIDE_MULTIPLIER = 2;
-	[Export] public float SLIDE_DURATION = 5.0f;
+	[Export] public float SLIDE_MULTIPLIER = 2.0f;
+	[Export] public float SLIDE_DURATION = 1.0f;
 	[Export] public int JUMP_VELOCITY = 5;
 	[Export] public int CROUCH_HEIGHT = 2;
 	[Export] public bool AffectedByGravity { get; set; } = true;
@@ -21,7 +21,8 @@ public partial class PlayerMovementController : Node
 	private bool _crouching = false;
 	private bool _sprinting = false;
 	private bool _jumping = false;
-	private bool _canSlide = true;
+
+	private SceneTreeTimer _slideTimer;
 
 
 	public void Initialize(Player player, CameraController camera)
@@ -144,28 +145,38 @@ public partial class PlayerMovementController : Node
 
 	private Vector3 ApplySlide(Vector3 velocity, double delta)
 	{
-		// if (!_crouching) return velocity;
-		// if (!_player.IsOnFloor()) return velocity;
+		if (!CheckSlideConditions(velocity))
+		{
+			_slideTimer = null;
+			return velocity;
+		}
 
-		// Vector3 slideDirection = velocity.Normalized();
-		// Vector3 slideVelocity = slideDirection * velocity * SLIDE_MULTIPLIER;
-		// velocity += slideVelocity;
+		if (_slideTimer == null)
+		{
+            _slideTimer = GetTree().CreateTimer(SLIDE_DURATION, false);
+		}
+		else if (_slideTimer.TimeLeft <= 0)
+		{
+			return velocity;
+		}
 
-		// if (_canSlide == false)
-		// {
-		// 	GD.Print("Cannot slide");
-		// 	_player.GetTree().CreateTimer(SLIDE_DURATION, false).Timeout += () => {
-		// 		GD.Print("Slide ended");
-		// 		_canSlide = false;
-		// 	};
-		// }
-		// else
-		// {
-		// 	GD.Print("Can slide");
-		// 	_canSlide = false;
-		// }
+		velocity.X *= SLIDE_MULTIPLIER;
+		velocity.Z *= SLIDE_MULTIPLIER;
 
 		return velocity;
+	}
+
+	private bool CheckSlideConditions(Vector3 velocity)
+	{
+		if (!_crouching) return false; // Must be crouching
+		if (!_player.IsOnFloor()) return false; // Must be on the floor
+
+		// Must be moving in a direction
+		Vector3 velocityHorizontalOnly = velocity;
+		velocityHorizontalOnly.Y = 0;
+		if (velocityHorizontalOnly.Length() == 0) return false;
+
+		return true;
 	}
 
 
