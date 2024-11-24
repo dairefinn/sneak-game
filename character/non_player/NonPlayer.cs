@@ -11,6 +11,7 @@ public partial class NonPlayer : CharacterBody3D
 	[Export] public CollisionShape3D Hitbox { get; set; }
 	[Export] public Area3D DetectionArea { get; set; }
 	[Export] public NonPlayerBrain Brain { get; set; }
+	[Export] public NonPlayerMovementController MovementContoller { get; set; }
 
 
 	public override void _Ready()
@@ -18,6 +19,7 @@ public partial class NonPlayer : CharacterBody3D
 		base._Ready();
 
 		Brain?.Initialize(this);
+		MovementContoller?.Initialize(this);
 
 		if (DetectionArea != null)
 		{
@@ -32,12 +34,12 @@ public partial class NonPlayer : CharacterBody3D
     }
 
 
-	private void OnDetectionAreaBodyEntered(Node body)
+	private void OnDetectionAreaBodyEntered(Node3D body)
 	{
 		Brain?.AddDetectedBody(body);
 	}
 
-	private void OnDetectionAreaBodyExited(Node body)
+	private void OnDetectionAreaBodyExited(Node3D body)
 	{
 		Brain?.RemoveDetectedBody(body);
 	}

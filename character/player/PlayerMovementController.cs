@@ -10,13 +10,13 @@ public partial class PlayerMovementController : Node
 
 
 	[ExportGroup("Physics")]
-	[Export] public int SPEED = 10;
-	[Export] public float SLIDE_MULTIPLIER = 2.0f;
-	[Export] public float SLIDE_DURATION = 1.0f;
-	[Export] public int JUMP_VELOCITY = 5;
-	[Export] public int CROUCH_HEIGHT = 2;
+	[Export] public int MovementSpeed = 10;
+	[Export] public float SlideMultiplier = 2.0f;
+	[Export] public float SlideDuration = 1.0f;
+	[Export] public int JumpVelocity = 5;
+	[Export] public float CrouchHeight = 0.5f;
 	[Export] public bool AffectedByGravity { get; set; } = true;
-	[Export] public Vector3 GRAVITY_VECTOR = new Vector3(0, -9.8f, 0);
+	[Export] public Vector3 Gravity = new Vector3(0, -9.8f, 0);
 
 	private bool _crouching = false;
 	private bool _sprinting = false;
@@ -118,7 +118,7 @@ public partial class PlayerMovementController : Node
 		}
 		else
 		{
-			velocity.Y += (float)(GRAVITY_VECTOR.Y * delta);
+			velocity.Y += (float)(Gravity.Y * delta);
 		}
 
 		return velocity;
@@ -126,7 +126,7 @@ public partial class PlayerMovementController : Node
 
 	public Vector3 ApplyMovement(Vector3 desiredMovement, Vector3 velocity, double delta)
 	{
-		Vector3 movement = desiredMovement * SPEED;
+		Vector3 movement = desiredMovement * MovementSpeed;
 
 		velocity.X = movement.X;
 		velocity.Z = movement.Z;
@@ -138,7 +138,7 @@ public partial class PlayerMovementController : Node
 	{
 		if (!_jumping) return velocity;
 
-		velocity.Y += JUMP_VELOCITY;
+		velocity.Y += JumpVelocity;
 
 		return velocity;
 	}
@@ -153,15 +153,15 @@ public partial class PlayerMovementController : Node
 
 		if (_slideTimer == null)
 		{
-            _slideTimer = GetTree().CreateTimer(SLIDE_DURATION, false);
+            _slideTimer = GetTree().CreateTimer(SlideDuration, false);
 		}
 		else if (_slideTimer.TimeLeft <= 0)
 		{
 			return velocity;
 		}
 
-		velocity.X *= SLIDE_MULTIPLIER;
-		velocity.Z *= SLIDE_MULTIPLIER;
+		velocity.X *= SlideMultiplier;
+		velocity.Z *= SlideMultiplier;
 
 		return velocity;
 	}
@@ -187,7 +187,7 @@ public partial class PlayerMovementController : Node
 
 	private void ApplyCrouch()
 	{
-		float newScaleY = _crouching ? 0.5f : 1.0f;
+		float newScaleY = _crouching ? CrouchHeight : 1.0f;
 		SetHitboxScaleY(newScaleY);
 	}
 	

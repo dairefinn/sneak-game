@@ -7,17 +7,24 @@ public partial class NpcActionFollow : NonPlayerAction
 
     [Export] public float FollowSpeed = 10;
 
+    private Node3D _target;
+
     public override bool Execute(NonPlayerBrain owner, double delta)
     {
         bool success = base.Execute(owner, delta);
         if (!success) return false;
 
-        if ((owner.TargetPosition - owner.NonPlayer.GlobalTransform.Origin).Length() <= 5)
+        if (owner._detectedBodies.Count > 0)
         {
-            return false;
+            GD.Print("Following detected body: " + owner._detectedBodies[0].Name);
+            _target = owner._detectedBodies[0];
         }
 
-        owner.MoveToTargetNode(FollowSpeed);
+        if (_target == null) return false;
+
+        
+        owner.NonPlayer.MovementContoller.TargetPosition = _target.GlobalTransform.Origin;
+        owner.NonPlayer.MovementContoller.MovementSpeed = FollowSpeed;
 
         return true;
     }

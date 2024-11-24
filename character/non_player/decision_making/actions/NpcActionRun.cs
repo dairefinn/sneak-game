@@ -15,32 +15,33 @@ public partial class NpcActionRun : NonPlayerAction
         bool success = base.Execute(owner, delta);
         if (!success) return false;
 
-        if (lastPosition != null)
+        // TODO: Might make more sense to have this in the movement controller
+        // if (lastPosition != null)
+        // {
+        //     Vector3 distanceMoved = (owner.NonPlayer.GlobalTransform.Origin - lastPosition).Value;
+        //     if (distanceMoved.Length() <= 0.1f)
+        //     {
+        //         timeWithoutMoving += delta;
+        //         if (timeWithoutMoving >= 5)
+        //         {
+        //             owner.NonPlayer.MovementContoller.TargetNewRandomPositionOnMap();
+        //             timeWithoutMoving = 0;
+        //         }
+        //     }
+        //     else
+        //     {
+        //         timeWithoutMoving = 0;
+        //     }
+        // }
+
+        // lastPosition = owner.NonPlayer.GlobalTransform.Origin;
+
+        if (owner._detectedBodies.Count > 0)
         {
-            Vector3 distanceMoved = (owner.NonPlayer.GlobalTransform.Origin - lastPosition).Value;
-            if (distanceMoved.Length() <= 0.1f)
-            {
-                timeWithoutMoving += delta;
-                if (timeWithoutMoving >= 5)
-                {
-                    owner.TargetNewRandomPositionOnMap();
-                    timeWithoutMoving = 0;
-                }
-            }
-            else
-            {
-                timeWithoutMoving = 0;
-            }
+            owner.NonPlayer.MovementContoller.TargetPosition = owner._detectedBodies[0].GlobalTransform.Origin;
         }
 
-        if ((owner.TargetPosition - owner.NonPlayer.GlobalTransform.Origin).Length() <= 5 || timeWithoutMoving >= 5)
-        {
-            owner.TargetNewRandomPositionOnMap();
-            return false;
-        }
-
-        lastPosition = owner.NonPlayer.GlobalTransform.Origin;
-        owner.MoveToTargetPoint(RunSpeed);
+        owner.NonPlayer.MovementContoller.MovementSpeed = RunSpeed;
 
         return true;
     }

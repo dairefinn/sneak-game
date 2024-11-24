@@ -26,6 +26,8 @@ MaxStamina = 100
 
 [resource]
 script = ExtResource("1_iq2ht")
+Name = ""
+Description = ""
 Attributes = SubResource("Resource_qrbjt")
 Stats = SubResource("Resource_1074n")
 Relations = SubResource("Resource_wln88")
