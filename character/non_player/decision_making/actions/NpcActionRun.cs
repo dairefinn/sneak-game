@@ -23,7 +23,7 @@ public partial class NpcActionRun : NonPlayerAction
                 timeWithoutMoving += delta;
                 if (timeWithoutMoving >= 5)
                 {
-                    NpcActionUtilities.GetNewRandomPositionOnMap(owner);
+                    owner.TargetNewRandomPositionOnMap();
                     timeWithoutMoving = 0;
                 }
             }
@@ -35,12 +35,12 @@ public partial class NpcActionRun : NonPlayerAction
 
         if ((owner.TargetPosition - owner.NonPlayer.GlobalTransform.Origin).Length() <= 5 || timeWithoutMoving >= 5)
         {
-            NpcActionUtilities.GetNewRandomPositionOnMap(owner);
+            owner.TargetNewRandomPositionOnMap();
             return false;
         }
 
         lastPosition = owner.NonPlayer.GlobalTransform.Origin;
-        NpcActionUtilities.MoveToPoint(owner, RunSpeed);
+        owner.MoveToTargetPoint(RunSpeed);
 
         return true;
     }

@@ -1,4 +1,4 @@
-[gd_scene load_steps=16 format=3 uid="uid://bajf0rhqebn0r"]
+[gd_scene load_steps=17 format=3 uid="uid://bajf0rhqebn0r"]
 
 [ext_resource type="PackedScene" uid="uid://dksfr8nd8sx31" path="res://world/levels/level_testing/level_testing.tscn" id="1_1wx7x"]
 [ext_resource type="PackedScene" uid="uid://di33ivj0tqhie" path="res://character/player/player.tscn" id="2_8hm8e"]
@@ -14,6 +14,7 @@
 [ext_resource type="Resource" uid="uid://8twbhkd4qchr" path="res://character/data/testing_soldier.tres" id="11_5d3eo"]
 [ext_resource type="Resource" uid="uid://c5eqt0c0xx184" path="res://character/data/bandit_kingpin.tres" id="12_n7xl6"]
 [ext_resource type="Resource" uid="uid://bg0l6lakcb0l4" path="res://character/non_player/decision_making/actions/npc_action_run.tres" id="12_uxal3"]
+[ext_resource type="Resource" uid="uid://lcb4wesoinsk" path="res://character/non_player/decision_making/actions/npc_action_follow.tres" id="13_66an7"]
 [ext_resource type="Resource" uid="uid://bc2mgcu06ksqk" path="res://character/non_player/decision_making/actions/npc_action_walk.tres" id="13_704wf"]
 
 [node name="Main" type="Node3D"]
@@ -52,7 +53,7 @@ Brain = NodePath("Brain")
 
 [node name="Brain" type="Node" parent="NonPlayer"]
 script = ExtResource("10_aft7t")
-PossibleActions = [ExtResource("12_uxal3"), ExtResource("13_704wf")]
+PossibleActions = [ExtResource("12_uxal3"), ExtResource("13_704wf"), ExtResource("13_66an7")]
 CurrentAction = ExtResource("13_704wf")
 TargetPosition = Vector3(26.113, 0.473, 20.691)
 
