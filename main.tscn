@@ -67,12 +67,10 @@ PossibleActions = [ExtResource("12_uxal3"), ExtResource("13_704wf")]
 CurrentAction = ExtResource("12_uxal3")
 TargetPosition = Vector3(26.113, 0.473, 20.691)
 
-[node name="NonPlayer3" parent="." node_paths=PackedStringArray("Brain") instance=ExtResource("8_pgai2")]
+[node name="NonPlayer3" parent="." instance=ExtResource("8_pgai2")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12.7704, 0.696495, -3.57631)
 Character = ExtResource("11_5d3eo")
-Brain = NodePath("")
 
-[node name="NonPlayer4" parent="." node_paths=PackedStringArray("Brain") instance=ExtResource("8_pgai2")]
+[node name="NonPlayer4" parent="." instance=ExtResource("8_pgai2")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17.9187, 0.696495, -3.57631)
 Character = ExtResource("12_n7xl6")
-Brain = NodePath("")

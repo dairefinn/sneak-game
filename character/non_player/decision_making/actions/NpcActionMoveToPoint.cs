@@ -39,7 +39,7 @@ public partial class NpcActionUtilities
             0,
             GD.RandRange(-50, 50)
         );
-        GD.Print("New target position: " + owner.TargetPosition);
+        // GD.Print("New target position: " + owner.TargetPosition);
     }
 
 }
