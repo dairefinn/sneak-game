@@ -8,18 +8,18 @@ public partial class NonPlayerBrain : Node
 
 	[Export] public Array<NonPlayerAction> PossibleActions { get; set; } = new Array<NonPlayerAction>();
 	[Export] public NonPlayerAction CurrentAction { get; set; } = null;
-
-    [ExportGroup("Conditional properties")]
+	[Export] public Array<Node3D> DetectedBodies = new();
 
 
 	public NonPlayer NonPlayer;
-	public readonly Array<Node3D> _detectedBodies = new();
+
 
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
 	public override void _Process(double delta)
 	{
 		TryPerformCurrentAction(delta);
 	}
+
 
 	public void Initialize(NonPlayer nonPlayer)
 	{
@@ -28,9 +28,7 @@ public partial class NonPlayerBrain : Node
 
 	public void TryPerformCurrentAction(double delta)
 	{
-		if (CurrentAction == null) return;
-
-		CurrentAction.Execute(this, delta);
+		CurrentAction?.Execute(this, delta);
 	}
 
 	public void ClearAction()
@@ -45,9 +43,9 @@ public partial class NonPlayerBrain : Node
 	{
 		if (body is NonPlayer npc && npc == NonPlayer) return; // Don't detect self
 
-		_detectedBodies.Add(body);
+		DetectedBodies.Add(body);
 
-		// TODO: Used for testing. Should be replaced with a more complex decision making system. Will follow any players it sees
+		// // TODO: Used for testing. Should be replaced with a more complex decision making system. Will follow any players it sees
 		if (body is Player player)
 		{
             foreach (var action in PossibleActions)
@@ -57,43 +55,61 @@ public partial class NonPlayerBrain : Node
                     CurrentAction = followAction;
                     return;
                 }
+				// if (action is NpcActionPatrol patrolAction)
+				// {
+				// 	CurrentAction = patrolAction;
+				// 	return;
+				// }
             }
 		}
 
-		// TODO: Used for testing. Should be replaced with a more complex decision making system. Will attack any NPCs it sees
-		if (body is NonPlayer nonPlayer)
+		// // TODO: Used for testing. Should be replaced with a more complex decision making system. Will attack any NPCs it sees
+		// if (body is NonPlayer nonPlayer)
+		// {
+		// 	foreach (var action in PossibleActions)
+		// 	{
+		// 		if (action is NpcActionAttack attackAction)
+		// 		{
+		// 			CurrentAction = attackAction;
+		// 			return;
+		// 		}
+		// 	}
+		// }
+	}
+
+	public void RemoveDetectedBody(Node3D body)
+	{
+		DetectedBodies.Remove(body);
+
+		// // TODO: Used for testing. Should be replaced with a more complex decision making system. Will start patrolling if it loses sight of a player
+		if (body is Player player)
 		{
 			foreach (var action in PossibleActions)
-			{
-				if (action is NpcActionAttack attackAction)
+			{				
+				if (action is NpcActionPatrol patrolAction)
 				{
-					CurrentAction = attackAction;
+					CurrentAction = patrolAction;
 					return;
 				}
 			}
 		}
 	}
 
-	public void RemoveDetectedBody(Node3D body)
-	{
-		_detectedBodies.Remove(body);
-	}
-
 	public void ClearDetectedBodies()
 	{
-		_detectedBodies.Clear();
+		DetectedBodies.Clear();
 	}
 
 	public bool IsBodyDetected(Node3D body)
 	{
-		return _detectedBodies.Contains(body);
+		return DetectedBodies.Contains(body);
 	}
 
 	public T GetFirstDetectedBody<T>() where T : Node3D
 	{
-		if (_detectedBodies.Count == 0) return null;
+		if (DetectedBodies.Count == 0) return null;
 
-		foreach (Node3D body in _detectedBodies)
+		foreach (Node3D body in DetectedBodies)
 		{
 			if (body is T tBody)
 			{

@@ -43,11 +43,12 @@ CharacterStatsUI = NodePath("../CharacterStatsUI")
 collision_mask = 0
 
 [node name="NonPlayer" parent="." instance=ExtResource("8_pgai2")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.05128, 0.696493, -3.57611)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.17897, 0.696493, -3.18306)
 Character = ExtResource("9_kryet")
 
 [node name="NonPlayer2" parent="." instance=ExtResource("8_pgai2")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.05128, 0.696493, -5.8518)
+visible = false
 Character = ExtResource("9_kryet")
 
 [node name="InventoryContainerUI" parent="." instance=ExtResource("10_v6t3p")]

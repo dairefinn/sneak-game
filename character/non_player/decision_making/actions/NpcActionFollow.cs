@@ -5,9 +5,11 @@ using Godot;
 public partial class NpcActionFollow : NonPlayerAction
 {
 
-    [Export] public float FollowSpeed = 10;
+    [Export] public float MovementSpeed = 10;
 
-    private Node3D _target;
+    [Export] public NodePath TargetPath;
+
+    public Node3D Target;
 
     public override bool Execute(NonPlayerBrain owner, double delta)
     {
@@ -17,14 +19,14 @@ public partial class NpcActionFollow : NonPlayerAction
         Node3D newTarget = owner.GetFirstDetectedBody<Player>();
         if (newTarget != null)
         {
-            _target = newTarget;
+            Target = newTarget;
         }
 
-        if (_target == null) return false;
+        if (Target == null) return false;
 
         
-        owner.NonPlayer.MovementContoller.TargetPosition = _target.GlobalTransform.Origin;
-        owner.NonPlayer.MovementContoller.MovementSpeed = FollowSpeed;
+        owner.NonPlayer.MovementContoller.TargetPosition = Target.GlobalTransform.Origin;
+        owner.NonPlayer.MovementContoller.MovementSpeed = MovementSpeed;
 
         return true;
     }

@@ -19,6 +19,8 @@ public partial class NonPlayerMovementController : Node
 	private bool _crouching = false;
 	private bool _jumping = false;
 
+    private MeshInstance3D _movementMesh;
+
     public void Initialize(NonPlayer nonPlayer)
     {
         _nonPlayer = nonPlayer;
@@ -43,6 +45,8 @@ public partial class NonPlayerMovementController : Node
         }
 
         _nonPlayer.MoveAndSlide();
+
+        DrawDebug();
     }
 
 	private void ApplyPhysics(Vector3 desiredMovement, double delta)
@@ -127,6 +131,29 @@ public partial class NonPlayerMovementController : Node
     public void ClearTargets()
     {
         TargetPosition = _nonPlayer.GlobalTransform.Origin;
+    }
+
+    public void DrawDebug()
+    {
+        if (!NavigationServer3D.GetDebugEnabled()) return; // Only show if Show Navigation debug is enabled
+
+        // Add the mesh container to the scene
+        Vector3 meshOffset = new(0, 1f, 0);
+        if (_movementMesh == null)
+        {
+            _movementMesh = new();
+            GetTree().CurrentScene.AddChild(_movementMesh);
+        }
+        
+        // Draw a line from the NPC to their current target
+        ImmediateMesh targetImmediateMesh = new();
+        targetImmediateMesh.SurfaceBegin(Mesh.PrimitiveType.LineStrip);
+        targetImmediateMesh.SurfaceAddVertex(_nonPlayer.GlobalTransform.Origin + meshOffset);
+        targetImmediateMesh.SurfaceAddVertex(TargetPosition + meshOffset);
+        targetImmediateMesh.SurfaceEnd();
+        targetImmediateMesh.SurfaceSetMaterial(0, new StandardMaterial3D() { EmissionEnabled = true, AlbedoColor = Colors.Green });
+        
+        _movementMesh.Mesh = targetImmediateMesh;
     }
 
 }

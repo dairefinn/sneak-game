@@ -4,8 +4,8 @@
 
 [resource]
 script = ExtResource("1_3yqn8")
-FollowSpeed = 10.0
-id = ""
+MovementSpeed = 5.0
+TargetPath = null
 ActionName = "Follow"
 ActionDescription = "Follows a node at a given speed"
 ActionCost = 1

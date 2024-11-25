@@ -1,0 +1,11 @@
+[gd_resource type="Resource" load_steps=2 format=3 uid="uid://d3881klmnnceo"]
+
+[ext_resource type="Script" path="res://character/non_player/decision_making/actions/NpcActionPatrol.cs" id="1_g1x5e"]
+
+[resource]
+script = ExtResource("1_g1x5e")
+MovementSpeed = 10.0
+Path = [Vector3(0, 0, 0), Vector3(20, 0, 0), Vector3(20, 0, 20), Vector3(0, 0, 20)]
+ActionName = ""
+ActionDescription = ""
+ActionCost = 0

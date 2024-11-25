@@ -5,10 +5,11 @@ using Godot;
 public partial class NpcActionRun : NonPlayerAction
 {
 
-    [Export] public float RunSpeed = 20;
+    [Export] public float MovementSpeed = 20;
+    [Export] public Vector3 TargetPosition;
 
     private double timeWithoutMoving = 0;
-    private Vector3? lastPosition = null;
+    // private Vector3? lastPosition = null;
 
     public override bool Execute(NonPlayerBrain owner, double delta)
     {
@@ -42,7 +43,7 @@ public partial class NpcActionRun : NonPlayerAction
             owner.NonPlayer.MovementContoller.TargetPosition = newTarget.GlobalTransform.Origin;
         }
 
-        owner.NonPlayer.MovementContoller.MovementSpeed = RunSpeed;
+        owner.NonPlayer.MovementContoller.MovementSpeed = MovementSpeed;
 
         return true;
     }
