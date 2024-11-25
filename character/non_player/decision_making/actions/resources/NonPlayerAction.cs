@@ -17,6 +17,11 @@ public partial class NonPlayerAction : Resource
         return true;
     }
 
+    public virtual bool Terminate(NonPlayerBrain owner)
+    {
+        return true;
+    }
+
     public virtual bool CanExecute(NonPlayerBrain owner)
     {
         return true;

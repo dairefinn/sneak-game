@@ -5,38 +5,36 @@ using Godot;
 public partial class NonPlayerMovementController : Node
 {
 
-    private NonPlayer _nonPlayer { get; set; }
-
-
-    [Export] public float MovementSpeed { get; set; } = 10;
+    [Export] public float MovementSpeed { get; set; } = 5;
 	[Export] public int JumpVelocity = 5;
     [Export] public bool AffectedByGravity { get; set; } = true;
 	[Export] public Vector3 Gravity = new Vector3(0, -9.8f, 0);
     [Export] public float StopThreshold { get; set; } = 2f;
-
     [Export] public Vector3 TargetPosition { get; set; }
 
+    private NonPlayer _nonPlayer;
+    private MeshInstance3D _movementMesh;
 	private bool _crouching = false;
 	private bool _jumping = false;
+    private Vector3 internalTargetPosition; // When the target position is updated, we smoothly lerp it to the new one. This holds the actual current destination.
 
-    private MeshInstance3D _movementMesh;
-
-    public void Initialize(NonPlayer nonPlayer)
-    {
-        _nonPlayer = nonPlayer;
-        TargetPosition = _nonPlayer.GlobalTransform.Origin;
-    }
 
     public override void _Process(double delta)
     {
         base._Process(delta);
 
-        Vector3 desiredMovement = GetDesiredMovement();
+        // Smoothly interpolate internalTargetPosition towards TargetPosition
+        Vector3 directionToTarget = _nonPlayer.GlobalTransform.Origin.DirectionTo(TargetPosition);
+        float maximumDistance = Mathf.Min(MovementSpeed, _nonPlayer.GlobalTransform.Origin.DistanceTo(TargetPosition));
+        Vector3 tempTargetPosition = _nonPlayer.GlobalTransform.Origin + (directionToTarget * maximumDistance);
+        internalTargetPosition = internalTargetPosition.MoveToward(tempTargetPosition, (float)delta * MovementSpeed * 2);
 
-        ApplyPhysics(desiredMovement, delta);
+        Vector3 desiredMovementDirection = GetDesiredMovementDirection();
+
+        ApplyPhysics(desiredMovementDirection, delta);
 
         // Face the target position if not already facing itx
-        Vector3 direction = _nonPlayer.GlobalPosition - TargetPosition;
+        Vector3 direction = _nonPlayer.GlobalPosition - internalTargetPosition;
         direction.Y = 0; // Zero out the Y component
         if (!direction.IsZeroApprox())
         {
@@ -47,6 +45,13 @@ public partial class NonPlayerMovementController : Node
         _nonPlayer.MoveAndSlide();
 
         DrawDebug();
+    }
+
+
+    public void Initialize(NonPlayer nonPlayer)
+    {
+        _nonPlayer = nonPlayer;
+        TargetPosition = _nonPlayer.GlobalTransform.Origin;
     }
 
 	private void ApplyPhysics(Vector3 desiredMovement, double delta)
@@ -95,7 +100,7 @@ public partial class NonPlayerMovementController : Node
 		return velocity;
 	}
 
-    private Vector3 GetDesiredMovement()
+    private Vector3 GetDesiredMovementDirection()
     {
         Vector3 desiredMovement = Vector3.Zero;
 
@@ -103,11 +108,8 @@ public partial class NonPlayerMovementController : Node
 
         if (IsNearPosition(TargetPosition, StopThreshold)) return desiredMovement;
 
-        // Get the direction to the target position
-        desiredMovement = TargetPosition - currentPosition;
-
-        // Normalize the movement vector
-        desiredMovement = desiredMovement.Normalized();
+        // Get the normalized direction to the target position
+        desiredMovement = (internalTargetPosition - currentPosition).Normalized();
 
         return desiredMovement;
     }
@@ -149,11 +151,27 @@ public partial class NonPlayerMovementController : Node
         ImmediateMesh targetImmediateMesh = new();
         targetImmediateMesh.SurfaceBegin(Mesh.PrimitiveType.LineStrip);
         targetImmediateMesh.SurfaceAddVertex(_nonPlayer.GlobalTransform.Origin + meshOffset);
-        targetImmediateMesh.SurfaceAddVertex(TargetPosition + meshOffset);
+        targetImmediateMesh.SurfaceAddVertex(internalTargetPosition + meshOffset);
         targetImmediateMesh.SurfaceEnd();
-        targetImmediateMesh.SurfaceSetMaterial(0, new StandardMaterial3D() { EmissionEnabled = true, AlbedoColor = Colors.Green });
+
+        // Draw a 1x1 square at internalTargetPosition
+        ImmediateMesh internalTargetImmediateMesh = new();
+        internalTargetImmediateMesh.SurfaceBegin(Mesh.PrimitiveType.LineStrip);
+        internalTargetImmediateMesh.SurfaceAddVertex(internalTargetPosition + meshOffset + new Vector3(-0.5f, 0, -0.5f));
+        internalTargetImmediateMesh.SurfaceAddVertex(internalTargetPosition + meshOffset + new Vector3(0.5f, 0, -0.5f));
+        internalTargetImmediateMesh.SurfaceAddVertex(internalTargetPosition + meshOffset + new Vector3(0.5f, 0, 0.5f));
+        internalTargetImmediateMesh.SurfaceAddVertex(internalTargetPosition + meshOffset + new Vector3(-0.5f, 0, 0.5f));
+        internalTargetImmediateMesh.SurfaceAddVertex(internalTargetPosition + meshOffset + new Vector3(-0.5f, 0, -0.5f));
+        internalTargetImmediateMesh.SurfaceEnd();
+
+        // Combine the meshes
+        ArrayMesh combinedMesh = new();
+        combinedMesh.AddSurfaceFromArrays(Mesh.PrimitiveType.LineStrip, targetImmediateMesh.SurfaceGetArrays(0));
+        combinedMesh.SurfaceSetMaterial(0, new StandardMaterial3D() { EmissionEnabled = true, AlbedoColor = Colors.Green });
+        combinedMesh.AddSurfaceFromArrays(Mesh.PrimitiveType.LineStrip, internalTargetImmediateMesh.SurfaceGetArrays(0));
+        combinedMesh.SurfaceSetMaterial(0, new StandardMaterial3D() { EmissionEnabled = true, AlbedoColor = Colors.Red });
         
-        _movementMesh.Mesh = targetImmediateMesh;
+        _movementMesh.Mesh = combinedMesh;
     }
 
 }

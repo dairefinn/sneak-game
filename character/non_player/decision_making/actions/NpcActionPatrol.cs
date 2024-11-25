@@ -6,12 +6,12 @@ using Godot.Collections;
 public partial class NpcActionPatrol : NonPlayerAction
 {
 
-    [Export] public float MovementSpeed = 10;
-    [Export] public float TargetReachedThreshold = 5;
+    [Export] public float MovementSpeed = 3;
+    [Export] public float TargetReachedThreshold = 1;
     [Export] public Array<Vector3> Path = new();
 
 
-    public Vector3 CurrentTarget;
+    public Vector3? CurrentTarget;
 
     private MeshInstance3D _pathMesh;
 
@@ -21,16 +21,33 @@ public partial class NpcActionPatrol : NonPlayerAction
         bool success = base.Execute(owner, delta);
         if (!success) return false;
 
-        if (owner.NonPlayer.MovementContoller.IsNearPosition(CurrentTarget, TargetReachedThreshold))
+        if (CurrentTarget == null)
         {
-            CurrentTarget = GetNextTargetOnPath(CurrentTarget);
+            GD.PrintErr("CurrentTarget is null. Looking for nearest point on path.");
+            CurrentTarget = GetNearestPointOnPath(owner.NonPlayer.GlobalTransform.Origin);
+        }
+
+        if(CurrentTarget == null) return false;
+
+        Vector3 currentTargetUsing = (Vector3) CurrentTarget;
+
+        if (owner.NonPlayer.MovementContoller.IsNearPosition(currentTargetUsing, TargetReachedThreshold))
+        {
+            CurrentTarget = GetNextTargetOnPath(currentTargetUsing);
         }
        
-        owner.NonPlayer.MovementContoller.TargetPosition = CurrentTarget;
+        owner.NonPlayer.MovementContoller.TargetPosition = currentTargetUsing;
+        owner.NonPlayer.MovementContoller.StopThreshold = TargetReachedThreshold;
         owner.NonPlayer.MovementContoller.MovementSpeed = MovementSpeed;
 
         DrawDebug(owner);
 
+        return true;
+    }
+
+    public override bool Terminate(NonPlayerBrain owner)
+    {
+        CurrentTarget = null;
         return true;
     }
 
@@ -48,6 +65,23 @@ public partial class NpcActionPatrol : NonPlayerAction
         if (nextIndex >= Path.Count) nextIndex = 0;
 
         return Path[nextIndex];
+    }
+    
+    private Vector3 GetNearestPointOnPath(Vector3 currentPosition)
+    {
+        Vector3 nearestPoint = Path[0];
+        float nearestDistance = currentPosition.DistanceTo(nearestPoint);
+        foreach (var point in Path)
+        {
+            float distance = currentPosition.DistanceTo(point);
+            if (distance < nearestDistance)
+            {
+                nearestPoint = point;
+                nearestDistance = distance;
+            }
+        }
+
+        return nearestPoint;
     }
 
     private void DrawDebug(NonPlayerBrain owner)
@@ -87,15 +121,18 @@ public partial class NpcActionPatrol : NonPlayerAction
         {
             ImmediateMesh circleMesh = new();
             circleMesh.SurfaceBegin(Mesh.PrimitiveType.LineStrip);
-            for (int i = 0; i < 360; i += 10)
+            Vector3? firstPoint = null;
+            for (int i = 0; i < 360; i += 45) // The increment here will determine the number of points in the circle (90 = 4 points, 45 = 8 points, etc.)
             {
                 float angle = Mathf.DegToRad(i);
                 float x = Mathf.Cos(angle) * TargetReachedThreshold;
                 float z = Mathf.Sin(angle) * TargetReachedThreshold;
                 Vector3 circlePoint = new Vector3(x, 0, z) + point;
                 circlePoint += meshOffset;
+                if (firstPoint == null) firstPoint = circlePoint;
                 circleMesh.SurfaceAddVertex(circlePoint);
             }
+            if (firstPoint != null) circleMesh.SurfaceAddVertex(firstPoint.Value);
             circleMesh.SurfaceEnd();
             thresholdCircles.Add(circleMesh);
         }

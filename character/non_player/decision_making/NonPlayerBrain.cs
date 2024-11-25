@@ -7,7 +7,11 @@ public partial class NonPlayerBrain : Node
 {
 
 	[Export] public Array<NonPlayerAction> PossibleActions { get; set; } = new Array<NonPlayerAction>();
-	[Export] public NonPlayerAction CurrentAction { get; set; } = null;
+	[Export] public NonPlayerAction CurrentAction {
+		get => _currentAction;
+		set => SetCurrentAction(value);
+	}
+	private NonPlayerAction _currentAction = null;
 	[Export] public Array<Node3D> DetectedBodies = new();
 
 
@@ -17,6 +21,7 @@ public partial class NonPlayerBrain : Node
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
 	public override void _Process(double delta)
 	{
+		// TODO: Instead of starting this here, the action should be instantiated as a node and the _process method in that node can be used to execute the action. This will allow for one-off actions and looping actions more easily.
 		TryPerformCurrentAction(delta);
 	}
 
@@ -29,6 +34,17 @@ public partial class NonPlayerBrain : Node
 	public void TryPerformCurrentAction(double delta)
 	{
 		CurrentAction?.Execute(this, delta);
+	}
+
+	private void SetCurrentAction(NonPlayerAction action)
+	{
+		bool hasActionAlready = _currentAction != null;
+		if (hasActionAlready)
+		{
+			_currentAction.Terminate(this);
+		}
+
+		_currentAction = action;
 	}
 
 	public void ClearAction()

@@ -4,7 +4,8 @@
 
 [resource]
 script = ExtResource("1_g1x5e")
-MovementSpeed = 10.0
+MovementSpeed = 3.0
+TargetReachedThreshold = 2.0
 Path = [Vector3(0, 0, 0), Vector3(20, 0, 0), Vector3(20, 0, 20), Vector3(0, 0, 20)]
 ActionName = ""
 ActionDescription = ""
