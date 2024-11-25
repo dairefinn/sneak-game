@@ -27,14 +27,15 @@ public partial class CharacterStats : Resource
 
     private void SetCurrentHealth(int value)
     {
-        var previousHealth = _currentHealth;
+        GD.Print("Health changed to " + _currentHealth);
+        int previousHealth = _currentHealth;
         _currentHealth = Mathf.Clamp(value, 0, MaxHealth);
         EmitSignal(SignalName.HealthChanged, previousHealth);
     }
 
     private void SetCurrentStamina(int value)
     {
-        var previousStamina = _currentStamina;
+        int previousStamina = _currentStamina;
         _currentStamina = Mathf.Clamp(value, 0, MaxStamina);
         EmitSignal(SignalName.StaminaChanged, previousStamina);
     }
