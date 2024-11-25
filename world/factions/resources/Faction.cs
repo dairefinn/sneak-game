@@ -12,4 +12,15 @@ public partial class Faction : Resource
 	[Export] public Color Color { get; set; } = Colors.White;
 	[Export] public Texture2D Icon { get; set; }
 
+    public Faction CreateInstance()
+    {
+        Faction instance = Duplicate() as Faction;
+        
+		instance.Name = Name;
+		instance.Color = Color;
+		instance.Icon = Icon;
+
+        return instance;
+    }
+
 }

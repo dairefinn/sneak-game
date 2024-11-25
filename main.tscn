@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3 uid="uid://bajf0rhqebn0r"]
+[gd_scene load_steps=12 format=3 uid="uid://bajf0rhqebn0r"]
 
 [ext_resource type="PackedScene" uid="uid://dksfr8nd8sx31" path="res://world/levels/level_testing/level_testing.tscn" id="1_1wx7x"]
 [ext_resource type="PackedScene" uid="uid://di33ivj0tqhie" path="res://character/player/player.tscn" id="2_8hm8e"]
@@ -9,6 +9,8 @@
 [ext_resource type="Script" path="res://world/spawning/SpawningHandler.cs" id="6_cr3jo"]
 [ext_resource type="PackedScene" uid="uid://b8cokptk8xr4f" path="res://character/non_player/NonPlayer.tscn" id="8_pgai2"]
 [ext_resource type="Resource" uid="uid://dae7g51jfv2nn" path="res://character/data/lead_researcher.tres" id="9_kryet"]
+[ext_resource type="PackedScene" uid="uid://bcy8iq3a45jt1" path="res://item/ui/inventory_container_ui.tscn" id="10_v6t3p"]
+[ext_resource type="PackedScene" uid="uid://b80glou8ru3qd" path="res://ui/character_stats_ui.tscn" id="11_q4bmc"]
 
 [node name="Main" type="Node3D"]
 
@@ -27,10 +29,11 @@ script = ExtResource("4_g887l")
 Enabled = false
 DefaultScene = ExtResource("1_1wx7x")
 
-[node name="SpawningHandler" type="Node" parent="."]
+[node name="SpawningHandler" type="Node" parent="." node_paths=PackedStringArray("CharacterStatsUI")]
 script = ExtResource("6_cr3jo")
 Enabled = false
 PlayerScene = ExtResource("2_8hm8e")
+CharacterStatsUI = NodePath("../CharacterStatsUI")
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 
@@ -46,3 +49,8 @@ Character = ExtResource("9_kryet")
 [node name="NonPlayer2" parent="." instance=ExtResource("8_pgai2")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.05128, 0.696493, -5.8518)
 Character = ExtResource("9_kryet")
+
+[node name="InventoryContainerUI" parent="." instance=ExtResource("10_v6t3p")]
+visible = false
+
+[node name="CharacterStatsUI" parent="." instance=ExtResource("11_q4bmc")]

@@ -19,10 +19,10 @@ Faction = ExtResource("2_edt8x")
 
 [sub_resource type="Resource" id="Resource_68784"]
 script = ExtResource("4_ybuwe")
-CurrentHealth = 100
 MaxHealth = 100
-CurrentStamina = 100
 MaxStamina = 100
+CurrentHealth = 100
+CurrentStamina = 100
 
 [resource]
 script = ExtResource("1_kysu3")
