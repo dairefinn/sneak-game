@@ -63,6 +63,7 @@ public partial class NonPlayerBrain : Node
 
 	// ENTITY DETECTION
 	// TODO: Move to a separate handler and use signals to consume
+	// TODO: Add some timers here so that it's less jarring. eg Player is only "Detected" when they're in the vision cone for a certain amount of time and then "Lost" when they're out of the vision cone for a certain amount of time
 
 	public void AddDetectedBody(Node3D body)
 	{

@@ -5,7 +5,7 @@ using Godot;
 public partial class NonPlayerMovementController : Node
 {
 
-    [Export] public float MovementSpeed { get; set; } = 5;
+    [Export] public float MovementSpeed { get; set; } = 3;
 	[Export] public int JumpVelocity = 5;
     [Export] public bool AffectedByGravity { get; set; } = true;
 	[Export] public Vector3 Gravity = new Vector3(0, -9.8f, 0);
@@ -23,11 +23,7 @@ public partial class NonPlayerMovementController : Node
     {
         base._Process(delta);
 
-        // Smoothly interpolate internalTargetPosition towards TargetPosition
-        Vector3 directionToTarget = _nonPlayer.GlobalTransform.Origin.DirectionTo(TargetPosition);
-        float maximumDistance = Mathf.Min(MovementSpeed, _nonPlayer.GlobalTransform.Origin.DistanceTo(TargetPosition));
-        Vector3 tempTargetPosition = _nonPlayer.GlobalTransform.Origin + (directionToTarget * maximumDistance);
-        internalTargetPosition = internalTargetPosition.MoveToward(tempTargetPosition, (float)delta * MovementSpeed * 2);
+        internalTargetPosition = GetTargetPositionLimitedBySpeed(delta);
 
         Vector3 desiredMovementDirection = GetDesiredMovementDirection();
 
@@ -45,6 +41,16 @@ public partial class NonPlayerMovementController : Node
         _nonPlayer.MoveAndSlide();
 
         DrawDebug();
+    }
+
+
+    public Vector3 GetTargetPositionLimitedBySpeed(double delta)
+    {
+        Vector3 directionToTarget = _nonPlayer.GlobalTransform.Origin.DirectionTo(TargetPosition);
+        float maximumDistance = Mathf.Min(MovementSpeed, _nonPlayer.GlobalTransform.Origin.DistanceTo(TargetPosition));
+        Vector3 tempTargetPosition = _nonPlayer.GlobalTransform.Origin + (directionToTarget * maximumDistance);
+        Vector3 newTarget = internalTargetPosition.MoveToward(tempTargetPosition, (float)delta * MovementSpeed * 2);
+        return newTarget;
     }
 
 

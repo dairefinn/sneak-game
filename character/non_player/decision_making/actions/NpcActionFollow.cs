@@ -7,7 +7,7 @@ public partial class NpcActionFollow : NonPlayerAction
 
 	public override Type ActionType { get; set; } = Type.FOLLOW;
 
-    [Export] public float MovementSpeed = 10;
+    [Export] public float MovementSpeed = 3;
 
     [Export] public NodePath TargetPath;
 

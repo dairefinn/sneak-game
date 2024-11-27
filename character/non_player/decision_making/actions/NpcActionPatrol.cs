@@ -18,16 +18,6 @@ public partial class NpcActionPatrol : NonPlayerAction
     private MeshInstance3D _pathMesh;
 
 
-    public override void Enter()
-    {
-        GD.Print("Entering NpcActionPatrol");
-
-        TransitionRequested += (NonPlayerAction from, Type to) => {
-            GD.Print("Transition requested from " + from?.ActionType + " to " + to);
-        };
-    }
-
-
     public override void OnProcess(double delta)
     {
         if (!CanExecute()) return;
