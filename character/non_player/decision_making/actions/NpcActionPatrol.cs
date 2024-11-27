@@ -6,6 +6,8 @@ using Godot.Collections;
 public partial class NpcActionPatrol : NonPlayerAction
 {
 
+	public override Type ActionType { get; set; } = Type.PATROL;
+
     [Export] public float MovementSpeed = 3;
     [Export] public float TargetReachedThreshold = 1;
     [Export] public Array<Vector3> Path = new();
@@ -16,39 +18,47 @@ public partial class NpcActionPatrol : NonPlayerAction
     private MeshInstance3D _pathMesh;
 
 
-    public override bool Execute(NonPlayerBrain owner, double delta)
+    public override void Enter()
     {
-        bool success = base.Execute(owner, delta);
-        if (!success) return false;
+        GD.Print("Entering NpcActionPatrol");
+
+        TransitionRequested += (NonPlayerAction from, Type to) => {
+            GD.Print("Transition requested from " + from?.ActionType + " to " + to);
+        };
+    }
+
+
+    public override void OnProcess(double delta)
+    {
+        if (!CanExecute()) return;
 
         if (CurrentTarget == null)
         {
-            GD.PrintErr("CurrentTarget is null. Looking for nearest point on path.");
-            CurrentTarget = GetNearestPointOnPath(owner.NonPlayer.GlobalTransform.Origin);
+            GD.Print("CurrentTarget is null. Looking for nearest point on path.");
+            CurrentTarget = GetNearestPointOnPath(Brain.NonPlayer.GlobalTransform.Origin);
         }
 
-        if(CurrentTarget == null) return false;
+        if(CurrentTarget == null) return;
 
         Vector3 currentTargetUsing = (Vector3) CurrentTarget;
 
-        if (owner.NonPlayer.MovementContoller.IsNearPosition(currentTargetUsing, TargetReachedThreshold))
+        if (Brain.NonPlayer.MovementContoller.IsNearPosition(currentTargetUsing, TargetReachedThreshold))
         {
             CurrentTarget = GetNextTargetOnPath(currentTargetUsing);
         }
        
-        owner.NonPlayer.MovementContoller.TargetPosition = currentTargetUsing;
-        owner.NonPlayer.MovementContoller.StopThreshold = TargetReachedThreshold;
-        owner.NonPlayer.MovementContoller.MovementSpeed = MovementSpeed;
+        Brain.NonPlayer.MovementContoller.TargetPosition = currentTargetUsing;
+        Brain.NonPlayer.MovementContoller.StopThreshold = TargetReachedThreshold;
+        Brain.NonPlayer.MovementContoller.MovementSpeed = MovementSpeed;
 
-        DrawDebug(owner);
+        DrawDebug(Brain);
 
-        return true;
+        return;
     }
 
-    public override bool Terminate(NonPlayerBrain owner)
+    public override void Exit()
     {
         CurrentTarget = null;
-        return true;
     }
 
     /// <summary>

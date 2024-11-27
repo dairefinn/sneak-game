@@ -5,16 +5,17 @@ using Godot;
 public partial class NpcActionRun : NonPlayerAction
 {
 
+	public override Type ActionType { get; set; } = Type.RUN;
+
     [Export] public float MovementSpeed = 20;
     [Export] public Vector3 TargetPosition;
 
-    private double timeWithoutMoving = 0;
+    private double _timeWithoutMoving = 0;
     // private Vector3? lastPosition = null;
 
-    public override bool Execute(NonPlayerBrain owner, double delta)
+    public override void OnProcess(double delta)
     {
-        bool success = base.Execute(owner, delta);
-        if (!success) return false;
+        if (!CanExecute()) return;
 
         // TODO: Might make more sense to have this in the movement controller
         // if (lastPosition != null)
@@ -37,15 +38,15 @@ public partial class NpcActionRun : NonPlayerAction
 
         // lastPosition = owner.NonPlayer.GlobalTransform.Origin;
 
-        Node3D newTarget = owner.GetFirstDetectedBody<Player>();
+        Node3D newTarget = Brain.GetFirstDetectedBody<Player>();
         if (newTarget != null)
         {
-            owner.NonPlayer.MovementContoller.TargetPosition = newTarget.GlobalTransform.Origin;
+            Brain.NonPlayer.MovementContoller.TargetPosition = newTarget.GlobalTransform.Origin;
         }
 
-        owner.NonPlayer.MovementContoller.MovementSpeed = MovementSpeed;
+        Brain.NonPlayer.MovementContoller.MovementSpeed = MovementSpeed;
 
-        return true;
+        return;
     }
 
 }

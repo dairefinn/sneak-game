@@ -1,9 +1,0 @@
-[gd_resource type="Resource" load_steps=2 format=3 uid="uid://bg0l6lakcb0l4"]
-
-[ext_resource type="Script" path="res://character/non_player/decision_making/actions/NpcActionRun.cs" id="1_tle00"]
-
-[resource]
-script = ExtResource("1_tle00")
-ActionName = "Run"
-ActionDescription = "Move to a point quickly"
-ActionCost = 2

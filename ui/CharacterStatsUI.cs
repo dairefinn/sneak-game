@@ -29,11 +29,11 @@ public partial class CharacterStatsUI : Control
         _healthLabel = GetNode<Label>("%HealthLabel");
         _staminaLabel = GetNode<Label>("%StaminaLabel");
 
-        GetTree().CreateTimer(2.0f, false).Timeout += () => {
-            GD.Print("Setting Health and Stamina");
-            CharacterStats.CurrentHealth = 50;
-            CharacterStats.CurrentStamina = 50;
-        };
+        // GetTree().CreateTimer(2.0f, false).Timeout += () => {
+        //     GD.Print("Setting Health and Stamina");
+        //     CharacterStats.CurrentHealth = 50;
+        //     CharacterStats.CurrentStamina = 50;
+        // };
     }
 
 
@@ -51,7 +51,6 @@ public partial class CharacterStatsUI : Control
         float healthPercentage = _characterStats.CurrentHealth / (float)_characterStats.MaxHealth;
         _healthBar.Size = new Vector2(BarWidth * healthPercentage, _healthBar.Size.Y);
         _healthLabel.Text = $"{_characterStats.CurrentHealth}/{_characterStats.MaxHealth}";
-        GD.Print("Health changed to " + _characterStats.CurrentHealth);
     }
 
     private void OnStaminaChanged(int previousStamina)

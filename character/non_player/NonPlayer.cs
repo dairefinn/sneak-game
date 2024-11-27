@@ -18,8 +18,8 @@ public partial class NonPlayer : CharacterBody3D
 	{
 		base._Ready();
 
-		Brain?.Initialize(this);
 		MovementContoller?.Initialize(this);
+		Brain?.Initialize(this);
 
 		if (DetectionArea != null)
 		{

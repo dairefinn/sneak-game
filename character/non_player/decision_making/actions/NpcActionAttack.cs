@@ -5,16 +5,22 @@ using Godot;
 public partial class NpcActionAttack : NonPlayerAction
 {
 
+	public override Type ActionType { get; set; } = Type.ATTACK;
+
 	private Node3D _target;
 	private SceneTreeTimer _detectionTimer;
 
-    public override bool Execute(NonPlayerBrain owner, double delta)
+
+
+	public override void OnProcess(double delta)
 	{
-		Node3D newTarget = owner.GetFirstDetectedBody<NonPlayer>();
+		if (!CanExecute()) return;
+
+		Node3D newTarget = Brain.GetFirstDetectedBody<NonPlayer>();
         if (newTarget != null)
         {
             _target = newTarget;
-			_detectionTimer = owner.GetTree().CreateTimer(2.0f, false);
+			_detectionTimer = Brain.GetTree().CreateTimer(2.0f, false);
         }
 
 		// If the target is not detected for 2 seconds, clear the target
@@ -25,11 +31,11 @@ public partial class NpcActionAttack : NonPlayerAction
 
 		if (_target == null)
 		{
-			owner.ClearAction();
-			return false;
+			EmitSignal(SignalName.TransitionRequested, (int)NonPlayerAction.Type.PATROL);
+			return;
 		}
 
-		return true;
-	}
+		// TODO: Implement attack logic
+    }
 
 }

@@ -3,12 +3,12 @@
 [ext_resource type="Script" path="res://character/non_player/NonPlayer.cs" id="1_c3glv"]
 [ext_resource type="Texture2D" uid="uid://cwxei8a6go64u" path="res://assets/medival_people/texture/people_texture_map.png" id="2_t1h0r"]
 [ext_resource type="Script" path="res://character/non_player/NonPlayerMovementController.cs" id="3_owvmm"]
-[ext_resource type="Script" path="res://character/non_player/decision_making/NonPlayerBrain.cs" id="4_5d8p0"]
-[ext_resource type="Resource" uid="uid://bg0l6lakcb0l4" path="res://character/non_player/decision_making/actions/npc_action_run.tres" id="5_frud8"]
-[ext_resource type="Resource" uid="uid://bc2mgcu06ksqk" path="res://character/non_player/decision_making/actions/npc_action_walk.tres" id="6_bi2a6"]
-[ext_resource type="Resource" uid="uid://lcb4wesoinsk" path="res://character/non_player/decision_making/actions/npc_action_follow.tres" id="7_rnkd6"]
-[ext_resource type="Resource" uid="uid://b6lywye8f52ub" path="res://character/non_player/decision_making/actions/npc_action_attack.tres" id="8_vetdm"]
-[ext_resource type="Resource" uid="uid://d3881klmnnceo" path="res://character/non_player/decision_making/actions/npc_action_patrol.tres" id="9_u6t6w"]
+[ext_resource type="PackedScene" uid="uid://wybur8q8o38i" path="res://character/non_player/decision_making/non_player_brain.tscn" id="4_lbudn"]
+[ext_resource type="PackedScene" uid="uid://uvlmppkwgnks" path="res://character/non_player/decision_making/actions/NpcActionPatrol.tscn" id="5_4q375"]
+[ext_resource type="PackedScene" uid="uid://bf6hi6as13nc" path="res://character/non_player/decision_making/actions/NpcActionWalk.tscn" id="6_aviac"]
+[ext_resource type="PackedScene" uid="uid://daqlovq4ep6cg" path="res://character/non_player/decision_making/actions/NpcActionRun.tscn" id="7_hiei7"]
+[ext_resource type="PackedScene" uid="uid://dqk5uygesngy2" path="res://character/non_player/decision_making/actions/NpcActionFollow.tscn" id="8_rr6fy"]
+[ext_resource type="PackedScene" uid="uid://bj7g27irckux6" path="res://character/non_player/decision_making/actions/NpcActionAttack.tscn" id="9_gpuv7"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_d7ndh"]
 albedo_texture = ExtResource("2_t1h0r")
@@ -179,7 +179,7 @@ collision_mask = 3
 script = ExtResource("1_c3glv")
 Hitbox = NodePath("Hitbox")
 DetectionArea = NodePath("Armature/Skeleton3D/BoneAttachment3D/DetectionArea")
-Brain = NodePath("Brain")
+Brain = NodePath("NonPlayerBrain")
 MovementContoller = NodePath("MovementController")
 
 [node name="Armature" type="Node3D" parent="."]
@@ -500,6 +500,30 @@ shape = SubResource("CapsuleShape3D_ey8qo")
 [node name="MovementController" type="Node" parent="."]
 script = ExtResource("3_owvmm")
 
-[node name="Brain" type="Node" parent="."]
-script = ExtResource("4_5d8p0")
-PossibleActions = [ExtResource("5_frud8"), ExtResource("6_bi2a6"), ExtResource("7_rnkd6"), ExtResource("8_vetdm"), ExtResource("9_u6t6w")]
+[node name="NonPlayerBrain" parent="." instance=ExtResource("4_lbudn")]
+
+[node name="NpcActionPatrol" parent="NonPlayerBrain" instance=ExtResource("5_4q375")]
+Path = [Vector3(0, 0, 0), Vector3(10, 0, 0), Vector3(10, 0, 10), Vector3(0, 0, 10)]
+ActionName = "Patrol"
+ActionDescription = "Patrol along a path of Vector3 points"
+ActionCost = 1
+
+[node name="NpcActionWalk" parent="NonPlayerBrain" instance=ExtResource("6_aviac")]
+ActionName = "Walk"
+ActionDescription = "Walk to a point"
+ActionCost = 1
+
+[node name="NpcActionRun" parent="NonPlayerBrain" instance=ExtResource("7_hiei7")]
+ActionName = "Run"
+ActionDescription = "Run to a point"
+ActionCost = 2
+
+[node name="NpcActionFollow" parent="NonPlayerBrain" instance=ExtResource("8_rr6fy")]
+ActionName = "Follow"
+ActionDescription = "Follow a node"
+ActionCost = 1
+
+[node name="NpcActionAttack" parent="NonPlayerBrain" instance=ExtResource("9_gpuv7")]
+ActionName = "Attack"
+ActionDescription = "Attack a node"
+ActionCost = 2

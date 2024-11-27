@@ -5,30 +5,33 @@ using Godot;
 public partial class NpcActionFollow : NonPlayerAction
 {
 
+	public override Type ActionType { get; set; } = Type.FOLLOW;
+
     [Export] public float MovementSpeed = 10;
 
     [Export] public NodePath TargetPath;
 
-    public Node3D Target;
 
-    public override bool Execute(NonPlayerBrain owner, double delta)
+    private Node3D _target;
+
+
+    public override void OnProcess(double delta)
     {
-        bool success = base.Execute(owner, delta);
-        if (!success) return false;
+        if (!CanExecute()) return;
 
-        Node3D newTarget = owner.GetFirstDetectedBody<Player>();
+        Node3D newTarget = Brain.GetFirstDetectedBody<Player>();
         if (newTarget != null)
         {
-            Target = newTarget;
+            _target = newTarget;
         }
 
-        if (Target == null) return false;
+        if (_target == null) return;
 
         
-        owner.NonPlayer.MovementContoller.TargetPosition = Target.GlobalTransform.Origin;
-        owner.NonPlayer.MovementContoller.MovementSpeed = MovementSpeed;
+        Brain.NonPlayer.MovementContoller.TargetPosition = _target.GlobalTransform.Origin;
+        Brain.NonPlayer.MovementContoller.MovementSpeed = MovementSpeed;
 
-        return true;
+        return;
     }
 
 }

@@ -1,59 +1,68 @@
+#nullable enable
+
 namespace SneakGame;
 
+using System.Linq;
 using Godot;
 using Godot.Collections;
 
 public partial class NonPlayerBrain : Node
 {
 
-	[Export] public Array<NonPlayerAction> PossibleActions { get; set; } = new Array<NonPlayerAction>();
-	[Export] public NonPlayerAction CurrentAction {
-		get => _currentAction;
-		set => SetCurrentAction(value);
-	}
-	private NonPlayerAction _currentAction = null;
+	protected Dictionary<NonPlayerAction.Type, NonPlayerAction> Actions = new();
+
+	[Export] public NonPlayerAction.Type DefaultActionType = NonPlayerAction.Type.PATROL;
 	[Export] public Array<Node3D> DetectedBodies = new();
+	public NonPlayer? NonPlayer;
 
 
-	public NonPlayer NonPlayer;
+	private NonPlayerAction? CurrentAction;
 
 
-	// Called every frame. 'delta' is the elapsed time since the previous frame.
-	public override void _Process(double delta)
+    // Called every frame. 'delta' is the elapsed time since the previous frame.
+    public override void _Process(double delta)
 	{
-		// TODO: Instead of starting this here, the action should be instantiated as a node and the _process method in that node can be used to execute the action. This will allow for one-off actions and looping actions more easily.
-		TryPerformCurrentAction(delta);
+		CurrentAction?.OnProcess(delta);
+	}
+
+	public override void _Input(InputEvent _event)
+	{
+		CurrentAction?.OnInput(_event);
 	}
 
 
 	public void Initialize(NonPlayer nonPlayer)
 	{
 		NonPlayer = nonPlayer;
-	}
 
-	public void TryPerformCurrentAction(double delta)
-	{
-		CurrentAction?.Execute(this, delta);
-	}
-
-	private void SetCurrentAction(NonPlayerAction action)
-	{
-		bool hasActionAlready = _currentAction != null;
-		if (hasActionAlready)
+		foreach (NonPlayerAction action in GetChildren().OfType<NonPlayerAction>())
 		{
-			_currentAction.Terminate(this);
+			Actions[action.ActionType] = action;
+			action.Brain = this;
+			action.TransitionRequested += OnTransitionRequested;
 		}
 
-		_currentAction = action;
+		OnTransitionRequested(null, DefaultActionType);
 	}
 
-	public void ClearAction()
+	public void OnTransitionRequested(NonPlayerAction? from, NonPlayerAction.Type to)
 	{
-		CurrentAction = null;
-		NonPlayer.MovementContoller.ClearTargets();
+		if (from != CurrentAction) return;
+
+		NonPlayerAction newState = Actions[to];
+		if (newState == null) return;
+
+		GD.Print($"Transitioning from {from?.ActionType} to {to}");
+
+		CurrentAction?.Exit();
+
+		newState.Enter();
+		CurrentAction = newState;
+		newState.PostEnter();
 	}
 
 	// ENTITY DETECTION
+	// TODO: Move to a separate handler and use signals to consume
 
 	public void AddDetectedBody(Node3D body)
 	{
@@ -64,32 +73,13 @@ public partial class NonPlayerBrain : Node
 		// // TODO: Used for testing. Should be replaced with a more complex decision making system. Will follow any players it sees
 		if (body is Player player)
 		{
-            foreach (var action in PossibleActions)
-            {
-                if (action is NpcActionFollow followAction)
-                {
-                    CurrentAction = followAction;
-                    return;
-                }
-				// if (action is NpcActionPatrol patrolAction)
-				// {
-				// 	CurrentAction = patrolAction;
-				// 	return;
-				// }
-            }
+			CurrentAction?.ChangeToAction(NonPlayerAction.Type.FOLLOW);
 		}
 
-		// // TODO: Used for testing. Should be replaced with a more complex decision making system. Will attack any NPCs it sees
+		// TODO: Used for testing. Should be replaced with a more complex decision making system. Will attack any NPCs it sees
 		// if (body is NonPlayer nonPlayer)
 		// {
-		// 	foreach (var action in PossibleActions)
-		// 	{
-		// 		if (action is NpcActionAttack attackAction)
-		// 		{
-		// 			CurrentAction = attackAction;
-		// 			return;
-		// 		}
-		// 	}
+		// 	CurrentAction.EmitSignal(NonPlayerAction.SignalName.TransitionRequested, (int)NonPlayerAction.Type.ATTACK);
 		// }
 	}
 
@@ -100,14 +90,7 @@ public partial class NonPlayerBrain : Node
 		// // TODO: Used for testing. Should be replaced with a more complex decision making system. Will start patrolling if it loses sight of a player
 		if (body is Player player)
 		{
-			foreach (var action in PossibleActions)
-			{				
-				if (action is NpcActionPatrol patrolAction)
-				{
-					CurrentAction = patrolAction;
-					return;
-				}
-			}
+			CurrentAction?.ChangeToAction(NonPlayerAction.Type.PATROL);
 		}
 	}
 
@@ -121,7 +104,7 @@ public partial class NonPlayerBrain : Node
 		return DetectedBodies.Contains(body);
 	}
 
-	public T GetFirstDetectedBody<T>() where T : Node3D
+	public T? GetFirstDetectedBody<T>() where T : Node3D
 	{
 		if (DetectedBodies.Count == 0) return null;
 

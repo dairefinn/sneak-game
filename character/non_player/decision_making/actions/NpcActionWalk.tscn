@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://bf6hi6as13nc"]
+
+[ext_resource type="Script" path="res://character/non_player/decision_making/actions/NpcActionWalk.cs" id="1_x2fa2"]
+
+[node name="NpcActionWalk" type="Node"]
+script = ExtResource("1_x2fa2")
