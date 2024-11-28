@@ -1,6 +1,5 @@
 namespace SneakGame;
 
-using System.Collections.Generic;
 using Godot;
 
 public partial class NonPlayer : CharacterBody3D
@@ -9,9 +8,9 @@ public partial class NonPlayer : CharacterBody3D
 	[Export] public Character Character { get; set; }
 
 	[Export] public CollisionShape3D Hitbox { get; set; }
-	[Export] public Area3D DetectionArea { get; set; }
 	[Export] public NonPlayerBrain Brain { get; set; }
 	[Export] public NonPlayerMovementController MovementContoller { get; set; }
+	[Export] public NonPlayerDetectionHandler DetectionHandler { get; set; }
 
 
 	public override void _Ready()
@@ -19,29 +18,9 @@ public partial class NonPlayer : CharacterBody3D
 		base._Ready();
 
 		MovementContoller?.Initialize(this);
+		DetectionHandler?.Initialize(this);
 		Brain?.Initialize(this);
 
-		if (DetectionArea != null)
-		{
-			DetectionArea.BodyEntered += OnDetectionAreaBodyEntered;
-			DetectionArea.BodyExited += OnDetectionAreaBodyExited;
-		}
-	}
-
-    public override void _Process(double delta)
-    {
-        base._Process(delta);
-    }
-
-
-	private void OnDetectionAreaBodyEntered(Node3D body)
-	{
-		Brain?.AddDetectedBody(body);
-	}
-
-	private void OnDetectionAreaBodyExited(Node3D body)
-	{
-		Brain?.RemoveDetectedBody(body);
 	}
 
 }

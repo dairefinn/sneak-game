@@ -3,6 +3,9 @@ namespace SneakGame;
 using Godot;
 using Godot.Collections;
 
+/// <summary>
+/// The NPC will patrol between points in the Path array.
+/// </summary>
 public partial class NpcActionPatrol : NonPlayerAction
 {
 
@@ -11,6 +14,8 @@ public partial class NpcActionPatrol : NonPlayerAction
     [Export] public float MovementSpeed = 3;
     [Export] public float TargetReachedThreshold = 1;
     [Export] public Array<Vector3> Path = new();
+    [Export] public NonPlayer NonPlayer { get; set; }
+    [Export] public NonPlayerMovementController MovementController { get; set; }
 
 
     public Vector3? CurrentTarget;
@@ -25,23 +30,23 @@ public partial class NpcActionPatrol : NonPlayerAction
         if (CurrentTarget == null)
         {
             GD.Print("CurrentTarget is null. Looking for nearest point on path.");
-            CurrentTarget = GetNearestPointOnPath(Brain.NonPlayer.GlobalTransform.Origin);
+            CurrentTarget = GetNearestPointOnPath(NonPlayer.GlobalTransform.Origin);
         }
 
         if(CurrentTarget == null) return;
 
         Vector3 currentTargetUsing = (Vector3) CurrentTarget;
 
-        if (Brain.NonPlayer.MovementContoller.IsNearPosition(currentTargetUsing, TargetReachedThreshold))
+        if (MovementController.IsNearPosition(currentTargetUsing, TargetReachedThreshold))
         {
             CurrentTarget = GetNextTargetOnPath(currentTargetUsing);
         }
        
-        Brain.NonPlayer.MovementContoller.TargetPosition = currentTargetUsing;
-        Brain.NonPlayer.MovementContoller.StopThreshold = TargetReachedThreshold;
-        Brain.NonPlayer.MovementContoller.MovementSpeed = MovementSpeed;
+        MovementController.TargetPosition = currentTargetUsing;
+        MovementController.StopThreshold = TargetReachedThreshold;
+        MovementController.MovementSpeed = MovementSpeed;
 
-        DrawDebug(Brain);
+        DrawDebug();
 
         return;
     }
@@ -84,7 +89,7 @@ public partial class NpcActionPatrol : NonPlayerAction
         return nearestPoint;
     }
 
-    private void DrawDebug(NonPlayerBrain owner)
+    private void DrawDebug()
     {
         if (!NavigationServer3D.GetDebugEnabled()) return; // Only show if Show Navigation debug is enabled
 
@@ -93,7 +98,7 @@ public partial class NpcActionPatrol : NonPlayerAction
         if (_pathMesh == null)
         {
             _pathMesh = new();
-            owner.GetTree().CurrentScene.AddChild(_pathMesh);
+            GetTree().CurrentScene.AddChild(_pathMesh);
         }
         
         // Draw the patrol path

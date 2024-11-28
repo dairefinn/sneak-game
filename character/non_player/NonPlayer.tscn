@@ -1,14 +1,15 @@
-[gd_scene load_steps=16 format=4 uid="uid://b8cokptk8xr4f"]
+[gd_scene load_steps=17 format=4 uid="uid://b8cokptk8xr4f"]
 
 [ext_resource type="Script" path="res://character/non_player/NonPlayer.cs" id="1_c3glv"]
 [ext_resource type="Texture2D" uid="uid://cwxei8a6go64u" path="res://assets/medival_people/texture/people_texture_map.png" id="2_t1h0r"]
+[ext_resource type="Script" path="res://character/non_player/detection/NonPlayerDetectionHandler.cs" id="3_cresg"]
 [ext_resource type="Script" path="res://character/non_player/NonPlayerMovementController.cs" id="3_owvmm"]
 [ext_resource type="PackedScene" uid="uid://wybur8q8o38i" path="res://character/non_player/decision_making/non_player_brain.tscn" id="4_lbudn"]
-[ext_resource type="PackedScene" uid="uid://uvlmppkwgnks" path="res://character/non_player/decision_making/actions/NpcActionPatrol.tscn" id="5_4q375"]
-[ext_resource type="PackedScene" uid="uid://bf6hi6as13nc" path="res://character/non_player/decision_making/actions/NpcActionWalk.tscn" id="6_aviac"]
-[ext_resource type="PackedScene" uid="uid://daqlovq4ep6cg" path="res://character/non_player/decision_making/actions/NpcActionRun.tscn" id="7_hiei7"]
-[ext_resource type="PackedScene" uid="uid://dqk5uygesngy2" path="res://character/non_player/decision_making/actions/NpcActionFollow.tscn" id="8_rr6fy"]
-[ext_resource type="PackedScene" uid="uid://bj7g27irckux6" path="res://character/non_player/decision_making/actions/NpcActionAttack.tscn" id="9_gpuv7"]
+[ext_resource type="Script" path="res://character/non_player/decision_making/actions/NpcActionIdle.cs" id="5_lsd55"]
+[ext_resource type="Script" path="res://character/non_player/decision_making/actions/NpcActionPatrol.cs" id="6_4k5qs"]
+[ext_resource type="Script" path="res://character/non_player/decision_making/actions/NpcActionWalk.cs" id="7_0syc8"]
+[ext_resource type="Script" path="res://character/non_player/decision_making/actions/NpcActionRun.cs" id="8_qi3c7"]
+[ext_resource type="Script" path="res://character/non_player/decision_making/actions/NpcActionFollow.cs" id="9_1ff7r"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_d7ndh"]
 albedo_texture = ExtResource("2_t1h0r")
@@ -173,14 +174,14 @@ height = 4.0
 radius = 0.387293
 height = 1.75683
 
-[node name="NonPlayer" type="CharacterBody3D" node_paths=PackedStringArray("Hitbox", "DetectionArea", "Brain", "MovementContoller")]
+[node name="NonPlayer" type="CharacterBody3D" node_paths=PackedStringArray("Hitbox", "Brain", "MovementContoller", "DetectionHandler")]
 collision_layer = 4
 collision_mask = 3
 script = ExtResource("1_c3glv")
 Hitbox = NodePath("Hitbox")
-DetectionArea = NodePath("Armature/Skeleton3D/BoneAttachment3D/DetectionArea")
 Brain = NodePath("NonPlayerBrain")
 MovementContoller = NodePath("MovementController")
+DetectionHandler = NodePath("Armature/Skeleton3D/BoneAttachment3D/NonPlayerDetectionHandler")
 
 [node name="Armature" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, -4.37114e-08, 0, 4.37114e-08, 1, 0, 0, 0)
@@ -484,13 +485,14 @@ transform = Transform3D(-1, 1.78517e-12, -8.7431e-08, -1.90702e-08, 0.975916, 0.
 bone_name = "Head"
 bone_idx = 6
 
-[node name="DetectionArea" type="Area3D" parent="Armature/Skeleton3D/BoneAttachment3D"]
+[node name="NonPlayerDetectionHandler" type="Area3D" parent="Armature/Skeleton3D/BoneAttachment3D"]
 transform = Transform3D(1, -2.24063e-09, -1.96658e-08, -1.96658e-08, -0.224951, -0.97437, -2.24064e-09, 0.97437, -0.224951, 0, 0.5, -1.8)
 collision_layer = 0
 collision_mask = 6
 monitorable = false
+script = ExtResource("3_cresg")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Armature/Skeleton3D/BoneAttachment3D/DetectionArea"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Armature/Skeleton3D/BoneAttachment3D/NonPlayerDetectionHandler"]
 shape = SubResource("CapsuleShape3D_sy0pf")
 
 [node name="Hitbox" type="CollisionShape3D" parent="."]
@@ -501,29 +503,42 @@ shape = SubResource("CapsuleShape3D_ey8qo")
 script = ExtResource("3_owvmm")
 
 [node name="NonPlayerBrain" parent="." instance=ExtResource("4_lbudn")]
+DefaultActionType = 5
 
-[node name="NpcActionPatrol" parent="NonPlayerBrain" instance=ExtResource("5_4q375")]
+[node name="NpcActionIdle" type="Node" parent="NonPlayerBrain"]
+script = ExtResource("5_lsd55")
+ActionName = "Idle"
+ActionDescription = "Stand still, do nothing"
+
+[node name="NpcActionPatrol" type="Node" parent="NonPlayerBrain" node_paths=PackedStringArray("NonPlayer", "MovementController")]
+script = ExtResource("6_4k5qs")
 Path = [Vector3(0, 0, 0), Vector3(10, 0, 0), Vector3(10, 0, 10), Vector3(0, 0, 10)]
+NonPlayer = NodePath("../..")
+MovementController = NodePath("../../MovementController")
 ActionName = "Patrol"
 ActionDescription = "Patrol along a path of Vector3 points"
 ActionCost = 1
 
-[node name="NpcActionWalk" parent="NonPlayerBrain" instance=ExtResource("6_aviac")]
+[node name="NpcActionWalk" type="Node" parent="NonPlayerBrain" node_paths=PackedStringArray("DetectionHandler")]
+script = ExtResource("7_0syc8")
+DetectionHandler = NodePath("../../Armature/Skeleton3D/BoneAttachment3D/NonPlayerDetectionHandler")
 ActionName = "Walk"
 ActionDescription = "Walk to a point"
 ActionCost = 1
 
-[node name="NpcActionRun" parent="NonPlayerBrain" instance=ExtResource("7_hiei7")]
+[node name="NpcActionRun" type="Node" parent="NonPlayerBrain" node_paths=PackedStringArray("DetectionHandler")]
+script = ExtResource("8_qi3c7")
+DetectionHandler = NodePath("../../Armature/Skeleton3D/BoneAttachment3D/NonPlayerDetectionHandler")
 ActionName = "Run"
 ActionDescription = "Run to a point"
 ActionCost = 2
 
-[node name="NpcActionFollow" parent="NonPlayerBrain" instance=ExtResource("8_rr6fy")]
+[node name="NpcActionFollow" type="Node" parent="NonPlayerBrain" node_paths=PackedStringArray("DetectionHandler", "MovementContoller")]
+script = ExtResource("9_1ff7r")
+DetectionHandler = NodePath("../../Armature/Skeleton3D/BoneAttachment3D/NonPlayerDetectionHandler")
+MovementContoller = NodePath("../../MovementController")
 ActionName = "Follow"
 ActionDescription = "Follow a node"
 ActionCost = 1
 
-[node name="NpcActionAttack" parent="NonPlayerBrain" instance=ExtResource("9_gpuv7")]
-ActionName = "Attack"
-ActionDescription = "Attack a node"
-ActionCost = 2
+[node name="NpcActionAttack" type="Node" parent="NonPlayerBrain"]

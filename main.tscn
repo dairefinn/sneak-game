@@ -47,6 +47,5 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.17897, 0.696493, -3.18306)
 Character = ExtResource("9_kryet")
 
 [node name="InventoryContainerUI" parent="." instance=ExtResource("10_v6t3p")]
-visible = false
 
 [node name="CharacterStatsUI" parent="." instance=ExtResource("11_q4bmc")]

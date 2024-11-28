@@ -9,6 +9,7 @@ public partial class NpcActionRun : NonPlayerAction
 
     [Export] public float MovementSpeed = 20;
     [Export] public Vector3 TargetPosition;
+	[Export] public NonPlayerDetectionHandler DetectionHandler { get; set; }
 
     private double _timeWithoutMoving = 0;
     // private Vector3? lastPosition = null;
@@ -38,7 +39,7 @@ public partial class NpcActionRun : NonPlayerAction
 
         // lastPosition = owner.NonPlayer.GlobalTransform.Origin;
 
-        Node3D newTarget = Brain.GetFirstDetectedBody<Player>();
+        Node3D newTarget = DetectionHandler.GetFirstDetectedBody<Player>();
         if (newTarget != null)
         {
             Brain.NonPlayer.MovementContoller.TargetPosition = newTarget.GlobalTransform.Origin;

@@ -1,6 +1,0 @@
-[gd_scene load_steps=2 format=3 uid="uid://bj7g27irckux6"]
-
-[ext_resource type="Script" path="res://character/non_player/decision_making/actions/NpcActionAttack.cs" id="1_8cjb3"]
-
-[node name="NpcActionAttack" type="Node"]
-script = ExtResource("1_8cjb3")

@@ -13,7 +13,8 @@ public partial class NonPlayerAction : Node
         FOLLOW,
         PATROL,
         RUN,
-        WALK
+        WALK,
+        IDLE
     }
 
     [Signal] public delegate void TransitionRequestedEventHandler(NonPlayerAction from, Type to);
