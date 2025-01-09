@@ -8,6 +8,17 @@ public partial class PlayerMovementController : Node
 	private CameraController _camera { get; set; }
 	private Player _player { get; set; }
 
+	
+	[ExportGroup("Abilities")]
+	[Export] public bool CanDoubleJump { get; set; } = true;
+	[Export] public bool CanSprint { get; set; } = true;
+	[Export] public bool CanSlide { get; set; } = true;
+	[Export] public bool CanCrouch { get; set; } = true;
+	[Export] public bool CanDash { get; set; } = true;
+	// TODO: Implement these
+	[Export] public bool CanWallClimb { get; set; } = true;
+	[Export] public bool CanWallRun { get; set; } = true;
+
 
 	[ExportGroup("Physics")]
 	[Export] public int MovementSpeed = 10;
@@ -17,14 +28,13 @@ public partial class PlayerMovementController : Node
 	[Export] public float CrouchHeight = 0.5f;
 	[Export] public bool AffectedByGravity { get; set; } = true;
 	[Export] public Vector3 Gravity = new Vector3(0, -9.8f, 0);
-	[Export] public bool CanDoubleJump { get; set; } = true;
-	[Export] public bool CanSprint { get; set; } = true;
 	[Export] public float SprintSpeedMultiplier = 2.0f;
 
 	private bool _crouching = false;
 	private bool _sprinting = false;
 	private bool _jumping = false;
 	private bool _hasDoubleJumped = false;
+	private bool _dashing = false;
 
 	private SceneTreeTimer _slideTimer;
 
@@ -62,6 +72,7 @@ public partial class PlayerMovementController : Node
 		_jumping = Input.IsActionJustPressed("move_jump");
 		_crouching = Input.IsActionPressed("move_crouch");
 		_sprinting = Input.IsActionPressed("move_sprint");
+		_dashing = Input.IsActionJustPressed("move_dash");
 
 		ApplyPhysics(desiredMovement, delta);
 		ApplyTransformations(delta);
@@ -115,6 +126,7 @@ public partial class PlayerMovementController : Node
 		newVelocity = ApplyJump(newVelocity, delta);
 		newVelocity = ApplySlide(newVelocity, delta);
 		newVelocity = ApplySprint(newVelocity, delta);
+		newVelocity = ApplyDash(newVelocity, delta);
 
 		_player.Velocity = newVelocity;
 	}
@@ -205,10 +217,27 @@ public partial class PlayerMovementController : Node
 		return velocity;
 	}
 
+	// TODO: This is jumpy. Maybe find movement direction and apply a force in that direction instead
+	private Vector3 ApplyDash(Vector3 velocity, double delta)
+	{
+		if (!CanDash) return velocity;
+		if (!_dashing) return velocity;
+
+		Vector3 movementDirection = GetDesiredMovement(_camera);
+		movementDirection.Y = 0;
+
+		velocity = movementDirection * MovementSpeed * 10;
+
+		return velocity;
+	}
+
 	private bool CheckSlideConditions(Vector3 velocity)
 	{
+		if (!CanSlide) return false; // Must be allowed to slide
 		if (!_crouching) return false; // Must be crouching
 		if (!_player.IsOnFloor()) return false; // Must be on the floor
+		if (velocity.Length() == 0) return false; // Must be moving
+		if (velocity.Length() < MovementSpeed) return false; // Must be moving faster than the base speed
 
 		// Must be moving in a direction
 		Vector3 velocityHorizontalOnly = velocity;
@@ -226,7 +255,13 @@ public partial class PlayerMovementController : Node
 
 	private void ApplyCrouch()
 	{
-		float newScaleY = _crouching ? CrouchHeight : 1.0f;
+		float newScaleY = 1.0f;
+
+		if (_crouching && CanCrouch)
+		{
+			newScaleY = CrouchHeight;
+		}
+
 		SetHitboxScaleY(newScaleY);
 	}
 	
