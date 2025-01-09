@@ -18,6 +18,8 @@ public partial class PlayerMovementController : Node
 	[Export] public bool AffectedByGravity { get; set; } = true;
 	[Export] public Vector3 Gravity = new Vector3(0, -9.8f, 0);
 	[Export] public bool CanDoubleJump { get; set; } = true;
+	[Export] public bool CanSprint { get; set; } = true;
+	[Export] public float SprintSpeedMultiplier = 2.0f;
 
 	private bool _crouching = false;
 	private bool _sprinting = false;
@@ -59,6 +61,7 @@ public partial class PlayerMovementController : Node
 
 		_jumping = Input.IsActionJustPressed("move_jump");
 		_crouching = Input.IsActionPressed("move_crouch");
+		_sprinting = Input.IsActionPressed("move_sprint");
 
 		ApplyPhysics(desiredMovement, delta);
 		ApplyTransformations(delta);
@@ -111,6 +114,7 @@ public partial class PlayerMovementController : Node
 		newVelocity = ApplyMovement(desiredMovement, newVelocity, delta);
 		newVelocity = ApplyJump(newVelocity, delta);
 		newVelocity = ApplySlide(newVelocity, delta);
+		newVelocity = ApplySprint(newVelocity, delta);
 
 		_player.Velocity = newVelocity;
 	}
@@ -166,6 +170,18 @@ public partial class PlayerMovementController : Node
 		return velocity;
 	}
 
+	private Vector3 ApplySprint(Vector3 velocity, double delta)
+	{
+		if (!_sprinting) return velocity;
+		if (!_player.IsOnFloor()) return velocity;
+
+		velocity.X *= SprintSpeedMultiplier;
+		velocity.Z *= SprintSpeedMultiplier;
+
+		return velocity;
+	}
+
+	// TODO: The slide speed should taper off over time
 	private Vector3 ApplySlide(Vector3 velocity, double delta)
 	{
 		if (!CheckSlideConditions(velocity))
