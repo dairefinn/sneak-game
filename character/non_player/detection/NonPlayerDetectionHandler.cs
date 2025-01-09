@@ -10,7 +10,7 @@ public partial class NonPlayerDetectionHandler : Area3D
 
 	[Export] public Array<Node3D> DetectedBodies = new();
 
-    private NonPlayer _nonPlayer;
+    private NonPlayer? _nonPlayer;
 
 
     public override void _Ready()
@@ -38,7 +38,7 @@ public partial class NonPlayerDetectionHandler : Area3D
 
         if (body is Player player)
         {
-            _nonPlayer.Brain.ChangeToAction(NonPlayerAction.Type.FOLLOW);
+            _nonPlayer?.Brain.ChangeToAction(NonPlayerAction.Type.FOLLOW);
         }
     }
 
@@ -50,7 +50,7 @@ public partial class NonPlayerDetectionHandler : Area3D
 
         if (success && body is Player player)
         {
-            _nonPlayer.Brain.ChangeToAction(NonPlayerAction.Type.PATROL);
+            _nonPlayer?.Brain.ChangeToAction(NonPlayerAction.Type.PATROL);
         }
     }
 

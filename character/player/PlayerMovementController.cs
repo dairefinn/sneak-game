@@ -17,10 +17,12 @@ public partial class PlayerMovementController : Node
 	[Export] public float CrouchHeight = 0.5f;
 	[Export] public bool AffectedByGravity { get; set; } = true;
 	[Export] public Vector3 Gravity = new Vector3(0, -9.8f, 0);
+	[Export] public bool CanDoubleJump { get; set; } = true;
 
 	private bool _crouching = false;
 	private bool _sprinting = false;
 	private bool _jumping = false;
+	private bool _hasDoubleJumped = false;
 
 	private SceneTreeTimer _slideTimer;
 
@@ -34,6 +36,11 @@ public partial class PlayerMovementController : Node
     public override void _Process(double delta)
 	{
 		if(_player == null) return;
+
+		if (_player.IsOnFloor())
+		{
+			_hasDoubleJumped = false;
+		}
 
 		// Stick the camera to the player if it's not focused on anything. Might make more sense to have this elsewhere.
 		if (_camera != null)
@@ -50,7 +57,7 @@ public partial class PlayerMovementController : Node
 
 		Vector3 desiredMovement = GetDesiredMovement(_camera);
 
-		_jumping = Input.IsActionPressed("move_jump") && _player.IsOnFloor();
+		_jumping = Input.IsActionJustPressed("move_jump");
 		_crouching = Input.IsActionPressed("move_crouch");
 
 		ApplyPhysics(desiredMovement, delta);
@@ -138,7 +145,23 @@ public partial class PlayerMovementController : Node
 	{
 		if (!_jumping) return velocity;
 
-		velocity.Y += JumpVelocity;
+		GD.Print("Jumping");
+
+		if (_player.IsOnFloor())
+		{
+			GD.Print("On floor");
+			velocity.Y += JumpVelocity;
+			return velocity;
+		}
+
+		if (!_hasDoubleJumped)
+		{
+			GD.Print("Double jumping");
+			_hasDoubleJumped = true;
+			velocity.Y += JumpVelocity;
+			return velocity;
+		}
+
 
 		return velocity;
 	}

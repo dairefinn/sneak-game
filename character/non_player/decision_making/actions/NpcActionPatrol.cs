@@ -21,6 +21,7 @@ public partial class NpcActionPatrol : NonPlayerAction
     public Vector3? CurrentTarget;
 
     private MeshInstance3D _pathMesh;
+    private bool patrolStarted = false;
 
 
     public override void OnProcess(double delta)
@@ -41,11 +42,14 @@ public partial class NpcActionPatrol : NonPlayerAction
         {
             CurrentTarget = GetNextTargetOnPath(currentTargetUsing);
         }
-       
-        MovementController.TargetPosition = currentTargetUsing;
-        MovementController.StopThreshold = TargetReachedThreshold;
-        MovementController.MovementSpeed = MovementSpeed;
 
+        if (!patrolStarted)
+        {
+            MovementController.TargetPosition = currentTargetUsing;
+            MovementController.StopThreshold = TargetReachedThreshold;
+            MovementController.MovementSpeed = MovementSpeed;
+        }
+       
         DrawDebug();
 
         return;

@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3 uid="uid://bajf0rhqebn0r"]
+[gd_scene load_steps=13 format=3 uid="uid://bajf0rhqebn0r"]
 
 [ext_resource type="PackedScene" uid="uid://dksfr8nd8sx31" path="res://world/levels/level_testing/level_testing.tscn" id="1_1wx7x"]
 [ext_resource type="PackedScene" uid="uid://di33ivj0tqhie" path="res://character/player/player.tscn" id="2_8hm8e"]
@@ -11,6 +11,9 @@
 [ext_resource type="Resource" uid="uid://dae7g51jfv2nn" path="res://character/data/lead_researcher.tres" id="9_kryet"]
 [ext_resource type="PackedScene" uid="uid://bcy8iq3a45jt1" path="res://item/ui/inventory_container_ui.tscn" id="10_v6t3p"]
 [ext_resource type="PackedScene" uid="uid://b80glou8ru3qd" path="res://ui/character_stats_ui.tscn" id="11_q4bmc"]
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_uxww8"]
+radius = 1.5
 
 [node name="Main" type="Node3D"]
 
@@ -45,6 +48,12 @@ collision_mask = 0
 [node name="NonPlayer" parent="." instance=ExtResource("8_pgai2")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.17897, 0.696493, -3.18306)
 Character = ExtResource("9_kryet")
+
+[node name="NpcInteractionArea" type="Area3D" parent="NonPlayer"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NonPlayer/NpcInteractionArea"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+shape = SubResource("CylinderShape3D_uxww8")
 
 [node name="InventoryContainerUI" parent="." instance=ExtResource("10_v6t3p")]
 
