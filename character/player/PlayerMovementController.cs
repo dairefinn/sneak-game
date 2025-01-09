@@ -36,7 +36,10 @@ public partial class PlayerMovementController : Node
 	private bool _hasDoubleJumped = false;
 	private bool _dashing = false;
 
+
+	private Vector3 _targetPosition;
 	private SceneTreeTimer _slideTimer;
+	private MeshInstance3D _debugMesh;
 
 
 	public void Initialize(Player player, CameraController camera)
@@ -61,10 +64,6 @@ public partial class PlayerMovementController : Node
 			{
 				_camera.FocusedEntity = _player;
 			}
-
-			Vector3 newRotation = _player.Rotation;
-			newRotation.Y = _camera.Rotation.Y + Mathf.Pi;
-			_player.Rotation = newRotation;
 		}
 
 		Vector3 desiredMovement = GetDesiredMovement(_camera);
@@ -78,6 +77,8 @@ public partial class PlayerMovementController : Node
 		ApplyTransformations(delta);
 
 		_player.MoveAndSlide();
+
+		DrawDebug();
 	}
 
 	private Vector3 GetDesiredMovement(CameraController camera)
@@ -161,18 +162,14 @@ public partial class PlayerMovementController : Node
 	{
 		if (!_jumping) return velocity;
 
-		GD.Print("Jumping");
-
 		if (_player.IsOnFloor())
 		{
-			GD.Print("On floor");
 			velocity.Y += JumpVelocity;
 			return velocity;
 		}
 
 		if (!_hasDoubleJumped)
 		{
-			GD.Print("Double jumping");
 			_hasDoubleJumped = true;
 			velocity.Y += JumpVelocity;
 			return velocity;
@@ -277,6 +274,35 @@ public partial class PlayerMovementController : Node
 		tween.SetTrans(Tween.TransitionType.Linear);
 		tween.TweenProperty(_player.Hitbox, "scale", newScale, 0.025f);
 		tween.Play();
+	}
+
+	private void DrawDebug()
+	{
+		if (!NavigationServer3D.GetDebugEnabled()) return; // Only show if Show Navigation debug is enabled
+
+        // Add the mesh container to the scene
+        Vector3 meshOffset = new(0, 1f, 0); // Bumps the mesh up 1 unit so it's not in the ground. TODO: Might be a way to make it render through other objects instead.
+        if (_debugMesh == null)
+        {
+            _debugMesh = new();
+            GetTree().CurrentScene.AddChild(_debugMesh);
+        }
+
+        ArrayMesh combinedMesh = new();
+
+		// Draw the projection of where we will move - can be used to visualize where we'll actually go without actually moving the character
+        ImmediateMesh projectedMovementMesh = new();
+        projectedMovementMesh.SurfaceBegin(Mesh.PrimitiveType.LineStrip);
+        projectedMovementMesh.SurfaceAddVertex(_targetPosition + meshOffset + new Vector3(-0.5f, 0, -0.5f));
+        projectedMovementMesh.SurfaceAddVertex(_targetPosition + meshOffset + new Vector3(0.5f, 0, -0.5f));
+        projectedMovementMesh.SurfaceAddVertex(_targetPosition + meshOffset + new Vector3(0.5f, 0, 0.5f));
+        projectedMovementMesh.SurfaceAddVertex(_targetPosition + meshOffset + new Vector3(-0.5f, 0, 0.5f));
+        projectedMovementMesh.SurfaceAddVertex(_targetPosition + meshOffset + new Vector3(-0.5f, 0, -0.5f));
+        projectedMovementMesh.SurfaceEnd();
+        combinedMesh.AddSurfaceFromArrays(Mesh.PrimitiveType.LineStrip, projectedMovementMesh.SurfaceGetArrays(0));
+        combinedMesh.SurfaceSetMaterial(0, new StandardMaterial3D() { EmissionEnabled = true, AlbedoColor = Colors.Green });
+        
+        _debugMesh.Mesh = combinedMesh;
 	}
 
 }

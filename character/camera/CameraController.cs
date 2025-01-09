@@ -9,6 +9,7 @@ public partial class CameraController : Camera3D
 
 	[Export] public Node3D FocusedEntity { get; set; } = null;
 	[Export] public CameraSettings CameraSettings { get; set; }
+	[Export] public bool RotateToFocusedEntity { get; set; } = true;
 
 
 	private Vector3 FocusPoint = new(0, 0, 0);
@@ -24,7 +25,7 @@ public partial class CameraController : Camera3D
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
 	public override void _Process(double delta)
 	{
-		FocusCamera();
+		FocusCamera(RotateToFocusedEntity);
 
 		// TODO: Remove when done testing or pause menu is implemented
 		if (Input.IsActionJustPressed("ui_cancel"))
@@ -53,7 +54,7 @@ public partial class CameraController : Camera3D
     }
 
 
-	public void FocusCamera()
+	public void FocusCamera(bool rotateToEntity = true)
 	{
 		// If we have a focused entity, focus the camera on it
 		if (FocusedEntity != null)
@@ -66,6 +67,14 @@ public partial class CameraController : Camera3D
 
 		// Apply the camera distance
 		newPosition += GlobalTransform.Basis.Z * CameraSettings.Distance;
+
+		// Apply the camera rotation to the target entity
+		if (FocusedEntity != null && rotateToEntity)
+		{
+			Vector3 newRotation = FocusedEntity.Rotation;
+			newRotation.Y = Rotation.Y + Mathf.Pi;
+			FocusedEntity.Rotation = newRotation;
+		}
 
 		Position = newPosition;
 	}

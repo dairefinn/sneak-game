@@ -14,7 +14,7 @@ public partial class NonPlayerMovementController : Node
     // [Export] public bool MoveToTarget { get; set; } = true; // If true, the NPC will move to the target position. If false, the NPC will stay in place.
 
     private NonPlayer _nonPlayer;
-    private MeshInstance3D _movementMesh;
+    private MeshInstance3D _debugMesh;
 	private bool _crouching = false;
 	private bool _jumping = false;
     private Vector3 internalTargetPosition; // When the target position is updated, we smoothly lerp it to the new one. This holds the actual current destination.
@@ -233,10 +233,10 @@ public partial class NonPlayerMovementController : Node
 
         // Add the mesh container to the scene
         Vector3 meshOffset = new(0, 1f, 0); // Bumps the mesh up 1 unit so it's not in the ground. TODO: Might be a way to make it render through other objects instead.
-        if (_movementMesh == null)
+        if (_debugMesh == null)
         {
-            _movementMesh = new();
-            GetTree().CurrentScene.AddChild(_movementMesh);
+            _debugMesh = new();
+            GetTree().CurrentScene.AddChild(_debugMesh);
         }
         
         // Draw a line from the NPC to their current target
@@ -275,7 +275,7 @@ public partial class NonPlayerMovementController : Node
         combinedMesh.AddSurfaceFromArrays(Mesh.PrimitiveType.LineStrip, targetPositionImmediateMesh.SurfaceGetArrays(0));
         combinedMesh.SurfaceSetMaterial(0, new StandardMaterial3D() { EmissionEnabled = true, AlbedoColor = Colors.Blue });
         
-        _movementMesh.Mesh = combinedMesh;
+        _debugMesh.Mesh = combinedMesh;
     }
 
 }
