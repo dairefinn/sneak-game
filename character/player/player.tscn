@@ -161,8 +161,8 @@ bind/40/bone = -1
 bind/40/pose = Transform3D(1, -3.04575e-05, -3.55579e-07, -1.2583e-05, -0.402303, 0.915507, -2.78335e-05, -0.915506, -0.402303, 0.219613, -0.0202042, 0.0331777)
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_4d760"]
-radius = 0.387293
-height = 1.75683
+radius = 0.4
+height = 1.8
 
 [node name="Player" type="CharacterBody3D" node_paths=PackedStringArray("MovementController", "Hitbox")]
 collision_layer = 6

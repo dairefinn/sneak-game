@@ -14,9 +14,6 @@ public partial class PlayerMovementController : Node
 	[Export] public bool CanSprint { get; set; } = true;
 	[Export] public bool CanCrouch { get; set; } = true;
 	[Export] public bool CanDash { get; set; } = true;
-	// TODO: Implement these
-	[Export] public bool CanWallClimb { get; set; } = true;
-	[Export] public bool CanWallRun { get; set; } = true;
 
 	[ExportGroup("Physics")]
 	[Export] public Vector3 Gravity = new(0, -25f, 0);
@@ -26,22 +23,25 @@ public partial class PlayerMovementController : Node
 	[Export] public float DoubleJumpThreshold = 1f;
 	[Export] public float DashMultiplier = 5.0f;
 	[Export] public float DashDuration = 0.5f;
+	[Export] public float DashCooldown = 1.0f;
 	[Export] public Vector3 CrouchModifier = new(1, 0.5f, 1);
 	[Export] public float SprintSpeedMultiplier = 2.0f;
 
 	// References
-	private CameraController _camera { get; set; }
-	private CharacterBody3D _player { get; set; }
-	private CollisionShape3D _hitbox { get; set; }
+	private CameraController Camera { get; set; }
+	private CharacterBody3D Player { get; set; }
+	private CollisionShape3D Hitbox { get; set; }
 
 	// Timers
 	private SceneTreeTimer _jumpTimer;
 	private SceneTreeTimer _doubleJumpTimer;
 	private SceneTreeTimer _dashTimer;
-	
+	private SceneTreeTimer _dashCooldownTimer;
+
 	// Ability states
 	private bool _hasDoubleJumped = false;
 	private bool _dashing = false;
+	private bool _dashOnCooldown = false;
 	private bool _sprinting = false;
 	private bool _jumping = false;
 	private bool _crouching = false;
@@ -57,16 +57,16 @@ public partial class PlayerMovementController : Node
 	/// <param name="camera">The camera that is attached to this movement controller.</param>
 	public void Initialize(CharacterBody3D player, CollisionShape3D hitbox, CameraController camera)
 	{
-		_player = player;
-		_hitbox = hitbox;
-		_camera = camera;
+		Player = player;
+		Hitbox = hitbox;
+		Camera = camera;
 
 		// Stick the camera to the player if it's not focused on anything. Might make more sense to have this elsewhere.
-		if (_camera != null)
+		if (Camera != null)
 		{
-			if (_camera.FocusedEntity == null)
+			if (Camera.FocusedEntity == null)
 			{
-				_camera.FocusedEntity = _player;
+				Camera.FocusedEntity = Player;
 			}
 		}
 	}
@@ -77,26 +77,20 @@ public partial class PlayerMovementController : Node
 	/// <param name="delta">The time since the last frame.</param>
     public override void _Process(double delta)
 	{
-		if(_player == null) return; // Player must exist in order to move them
+		if(Player == null) return; // Player must exist in order to move them
 		
-		_targetPosition = _player.GlobalTransform.Origin;
-		bool isOnFloor = _player.IsOnFloor();
-
-		// if (isOnFloor)
-		// {
-		// 	_hasDoubleJumped = false;
-		// 	_jumping = false;
-		// }
+		_targetPosition = Player.GlobalTransform.Origin;
+		bool isOnFloor = Player.IsOnFloor();
 
 		_crouching = Input.IsActionPressed("move_crouch");
 		Vector3 desiredMovement = GetDesiredMovement(isOnFloor, _crouching);
 
-		ApplyMovementVelocity(_player, isOnFloor, desiredMovement, _camera, delta);
+		ApplyMovementVelocity(Player, isOnFloor, desiredMovement, Camera, delta);
 
 		DrawDebug();
 
 		// Ensure the camera is updated every frame. This prevents jittery camera movement.
-		_camera._Process(delta);
+		Camera._Process(delta);
 	}
 
 	/// <summary>
@@ -150,7 +144,7 @@ public partial class PlayerMovementController : Node
 			StartJumpTimer();
 		}
 		
-		if (CanDash && Input.IsActionJustPressed("move_dash") && !crouching)
+		if (CanDash && Input.IsActionJustPressed("move_dash") && !crouching && !_dashOnCooldown)
 		{
 			StartDashTimer();
 		}
@@ -208,7 +202,7 @@ public partial class PlayerMovementController : Node
 
 		player.Velocity = newVelocity;
 
-		_targetPosition = _player.GlobalTransform.Origin + (desiredMovement.Rotated(Vector3.Up, camera.Rotation.Y));
+		_targetPosition = Player.GlobalTransform.Origin + (newVelocity / 4);
 		// _targetPosition = _player.GlobalTransform.Origin + newVelocity;
 
 		// Transformations
@@ -259,17 +253,29 @@ public partial class PlayerMovementController : Node
 			_dashTimer.Timeout -= OnDashTimerTimeout;
 			_dashTimer.Dispose();
 			_dashTimer = null;
+			_dashCooldownTimer.Timeout -= OnDashCooldownTimerTimeout;
+			_dashCooldownTimer.Dispose();
+			_dashCooldownTimer = null;
 		}
 
 		_dashing = true;
+		_dashOnCooldown = true;
 		_dashTimer = GetTree().CreateTimer(DashDuration, false);
 		_dashTimer.Timeout += OnDashTimerTimeout;
+		_dashCooldownTimer = GetTree().CreateTimer(DashCooldown, false);
+		_dashCooldownTimer.Timeout += OnDashCooldownTimerTimeout;
 	}
 
 	private void OnDashTimerTimeout()
 	{
 		GD.Print("Dash ended.");
 		_dashing = false;
+	}
+
+	private void OnDashCooldownTimerTimeout()
+	{
+		GD.Print("Dash cooldown ended.");
+		_dashOnCooldown = false;
 	}
 
 	/// <summary>
@@ -290,12 +296,12 @@ public partial class PlayerMovementController : Node
 
 	public void SetHitboxScaleY(Vector3 newScale)
 	{
-		if (_hitbox == null) return;
-		if (_hitbox.Scale == newScale) return;
+		if (Hitbox == null) return;
+		if (Hitbox.Scale == newScale) return;
 
 		Tween tween = CreateTween();
 		tween.SetTrans(Tween.TransitionType.Linear);
-		tween.TweenProperty(_hitbox, "scale", newScale, 0.025f);
+		tween.TweenProperty(Hitbox, "scale", newScale, 0.025f);
 		tween.Play();
 	}
 
@@ -305,35 +311,65 @@ public partial class PlayerMovementController : Node
 		if (!NavigationServer3D.GetDebugEnabled()) return; // Only show if Show Navigation debug is enabled
 
         // Add the mesh container to the scene
-        Vector3 meshOffset = new(0, 2, 0); // Bumps the mesh up 1 unit so it's not in the ground. TODO: Might be a way to make it render through other objects instead.
         if (_debugMesh == null)
         {
             _debugMesh = new();
             GetTree().CurrentScene.AddChild(_debugMesh);
         }
 
+		Vector3 playerHeight = new Vector3(0, 1.8f, 0);
+
         ArrayMesh combinedMesh = new();
 
-		List<Vector3> square = new()
-		{
-			new Vector3(-0.5f, 0, -0.5f),
-			new Vector3(0.5f, 0, -0.5f),
-			new Vector3(0.5f, 0, 0.5f),
-			new Vector3(-0.5f, 0, 0.5f),
-			new Vector3(-0.5f, 0, -0.5f)
-		};
-
 		// Draw the projection of where we will move - can be used to visualize where we'll actually go without actually moving the character
-        ImmediateMesh projectedMovementMesh = new();
-        projectedMovementMesh.SurfaceBegin(Mesh.PrimitiveType.LineStrip);
-        projectedMovementMesh.SurfaceAddVertex(_targetPosition + meshOffset + new Vector3(-0.5f, 0, -0.5f).Rotated(Vector3.Up, _player.Rotation.Y));
-        projectedMovementMesh.SurfaceAddVertex(_targetPosition + meshOffset + new Vector3(0.5f, 0, -0.5f).Rotated(Vector3.Up, _player.Rotation.Y));
-        projectedMovementMesh.SurfaceAddVertex(_targetPosition + meshOffset + new Vector3(0.5f, 0, 0.5f).Rotated(Vector3.Up, _player.Rotation.Y));
-        projectedMovementMesh.SurfaceAddVertex(_targetPosition + meshOffset + new Vector3(-0.5f, 0, 0.5f).Rotated(Vector3.Up, _player.Rotation.Y));
-        projectedMovementMesh.SurfaceAddVertex(_targetPosition + meshOffset + new Vector3(-0.5f, 0, -0.5f).Rotated(Vector3.Up, _player.Rotation.Y));
-        projectedMovementMesh.SurfaceEnd();
-        combinedMesh.AddSurfaceFromArrays(Mesh.PrimitiveType.LineStrip, projectedMovementMesh.SurfaceGetArrays(0));
+        ImmediateMesh projectedMovementMeshBottom = new();
+        projectedMovementMeshBottom.SurfaceBegin(Mesh.PrimitiveType.LineStrip);
+        projectedMovementMeshBottom.SurfaceAddVertex(_targetPosition + new Vector3(-0.5f, 0, -0.5f).Rotated(Vector3.Up, Player.Rotation.Y));
+        projectedMovementMeshBottom.SurfaceAddVertex(_targetPosition + new Vector3(0.5f, 0, -0.5f).Rotated(Vector3.Up, Player.Rotation.Y));
+        projectedMovementMeshBottom.SurfaceAddVertex(_targetPosition + new Vector3(0.5f, 0, 0.5f).Rotated(Vector3.Up, Player.Rotation.Y));
+        projectedMovementMeshBottom.SurfaceAddVertex(_targetPosition + new Vector3(-0.5f, 0, 0.5f).Rotated(Vector3.Up, Player.Rotation.Y));
+        projectedMovementMeshBottom.SurfaceAddVertex(_targetPosition + new Vector3(-0.5f, 0, -0.5f).Rotated(Vector3.Up, Player.Rotation.Y));
+        projectedMovementMeshBottom.SurfaceEnd();
+		combinedMesh.AddSurfaceFromArrays(Mesh.PrimitiveType.LineStrip, projectedMovementMeshBottom.SurfaceGetArrays(0));
         combinedMesh.SurfaceSetMaterial(0, new StandardMaterial3D() { EmissionEnabled = true, AlbedoColor = Colors.Green });
+
+        ImmediateMesh projectedMovementMeshTop = new();
+        projectedMovementMeshTop.SurfaceBegin(Mesh.PrimitiveType.LineStrip);
+        projectedMovementMeshTop.SurfaceAddVertex(playerHeight + _targetPosition + new Vector3(-0.5f, 0, -0.5f).Rotated(Vector3.Up, Player.Rotation.Y));
+        projectedMovementMeshTop.SurfaceAddVertex(playerHeight + _targetPosition + new Vector3(0.5f, 0, -0.5f).Rotated(Vector3.Up, Player.Rotation.Y));
+        projectedMovementMeshTop.SurfaceAddVertex(playerHeight + _targetPosition + new Vector3(0.5f, 0, 0.5f).Rotated(Vector3.Up, Player.Rotation.Y));
+        projectedMovementMeshTop.SurfaceAddVertex(playerHeight + _targetPosition + new Vector3(-0.5f, 0, 0.5f).Rotated(Vector3.Up, Player.Rotation.Y));
+        projectedMovementMeshTop.SurfaceAddVertex(playerHeight + _targetPosition + new Vector3(-0.5f, 0, -0.5f).Rotated(Vector3.Up, Player.Rotation.Y));
+        projectedMovementMeshTop.SurfaceEnd();
+        combinedMesh.AddSurfaceFromArrays(Mesh.PrimitiveType.LineStrip, projectedMovementMeshTop.SurfaceGetArrays(0));
+
+		ImmediateMesh cuboidEdge1 = new();
+		cuboidEdge1.SurfaceBegin(Mesh.PrimitiveType.Lines);
+		cuboidEdge1.SurfaceAddVertex(_targetPosition + new Vector3(-0.5f, 0, -0.5f).Rotated(Vector3.Up, Player.Rotation.Y));
+		cuboidEdge1.SurfaceAddVertex(playerHeight + _targetPosition + new Vector3(-0.5f, 0, -0.5f).Rotated(Vector3.Up, Player.Rotation.Y));
+		cuboidEdge1.SurfaceEnd();
+		combinedMesh.AddSurfaceFromArrays(Mesh.PrimitiveType.Lines, cuboidEdge1.SurfaceGetArrays(0));
+
+		ImmediateMesh cuboidEdge2 = new();
+		cuboidEdge2.SurfaceBegin(Mesh.PrimitiveType.Lines);
+		cuboidEdge2.SurfaceAddVertex(_targetPosition + new Vector3(0.5f, 0, -0.5f).Rotated(Vector3.Up, Player.Rotation.Y));
+		cuboidEdge2.SurfaceAddVertex(playerHeight + _targetPosition + new Vector3(0.5f, 0, -0.5f).Rotated(Vector3.Up, Player.Rotation.Y));
+		cuboidEdge2.SurfaceEnd();
+		combinedMesh.AddSurfaceFromArrays(Mesh.PrimitiveType.Lines, cuboidEdge2.SurfaceGetArrays(0));
+
+		ImmediateMesh cuboidEdge3 = new();
+		cuboidEdge3.SurfaceBegin(Mesh.PrimitiveType.Lines);
+		cuboidEdge3.SurfaceAddVertex(_targetPosition + new Vector3(-0.5f, 0, 0.5f).Rotated(Vector3.Up, Player.Rotation.Y));
+		cuboidEdge3.SurfaceAddVertex(playerHeight + _targetPosition + new Vector3(-0.5f, 0, 0.5f).Rotated(Vector3.Up, Player.Rotation.Y));
+		cuboidEdge3.SurfaceEnd();
+		combinedMesh.AddSurfaceFromArrays(Mesh.PrimitiveType.Lines, cuboidEdge3.SurfaceGetArrays(0));
+
+		ImmediateMesh cuboidEdge4 = new();
+		cuboidEdge4.SurfaceBegin(Mesh.PrimitiveType.Lines);
+		cuboidEdge4.SurfaceAddVertex(_targetPosition + new Vector3(0.5f, 0, 0.5f).Rotated(Vector3.Up, Player.Rotation.Y));
+		cuboidEdge4.SurfaceAddVertex(playerHeight + _targetPosition + new Vector3(0.5f, 0, 0.5f).Rotated(Vector3.Up, Player.Rotation.Y));
+		cuboidEdge4.SurfaceEnd();
+		combinedMesh.AddSurfaceFromArrays(Mesh.PrimitiveType.Lines, cuboidEdge4.SurfaceGetArrays(0));
         
         _debugMesh.Mesh = combinedMesh;
 	}
