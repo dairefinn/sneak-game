@@ -15,7 +15,7 @@ public partial class Player : CharacterBody3D
 	{
 		base._Ready();
 
-		MovementController?.Initialize(this, CameraController.Instance);
+		MovementController?.Initialize(this, Hitbox, CameraController.Instance);
 	}
 
 }

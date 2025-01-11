@@ -132,4 +132,4 @@ shape = SubResource("BoxShape3D_vg4sy")
 mesh = SubResource("BoxMesh_fsijl")
 
 [node name="SpawnPoint" parent="." instance=ExtResource("1_ufn8s")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18.8771, 2, 5.46989)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.11078, 3.70843, -12.4434)
