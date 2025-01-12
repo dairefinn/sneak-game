@@ -202,7 +202,7 @@ public partial class PlayerMovementController : Node
 
 		player.Velocity = newVelocity;
 
-		_targetPosition = Player.GlobalTransform.Origin + (newVelocity / 4);
+		_targetPosition = Player.GlobalTransform.Origin + (newVelocity * (float) delta * 10);
 		// _targetPosition = _player.GlobalTransform.Origin + newVelocity;
 
 		// Transformations

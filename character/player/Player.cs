@@ -1,5 +1,6 @@
 namespace SneakGame;
 
+using DeckBuilder;
 using Godot;
 
 public partial class Player : CharacterBody3D
@@ -16,6 +17,13 @@ public partial class Player : CharacterBody3D
 		base._Ready();
 
 		MovementController?.Initialize(this, Hitbox, CameraController.Instance);
+
+		Events.Instance.PlayerAddHealth += OnPlayerAddHealth;
+	}
+
+	private void OnPlayerAddHealth(int amount)
+	{
+		Character.Stats.CurrentHealth += amount;
 	}
 
 }
