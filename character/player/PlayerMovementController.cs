@@ -149,7 +149,7 @@ public partial class PlayerMovementController : Node
 			StartDashTimer();
 		}
 		
-		if (CanSprint && Input.IsActionPressed("move_sprint") && isOnFloor && !crouching)
+		if (CanSprint && Input.IsActionPressed("move_sprint") && (isOnFloor || _sprinting) && !crouching)
 		{
 			_sprinting = true;
 			desiredMovement.X *= SprintSpeedMultiplier;
