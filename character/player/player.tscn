@@ -25269,6 +25269,8 @@ skin = SubResource("Skin_n0yin")
 
 [node name="MovementController" type="Node" parent="."]
 script = ExtResource("2_qoodr")
+MovementSpeed = 3
+SprintSpeedMultiplier = 4.0
 
 [node name="Hitbox" type="CollisionShape3D" parent="."]
 transform = Transform3D(1.00744, 0, 0, 0, 1.00744, 0, 0, 0, 1.00744, 0, 0.975505, 0)

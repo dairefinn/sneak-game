@@ -86,12 +86,6 @@ public partial class PlayerMovementController : Node
 		_crouching = Input.IsActionPressed("move_crouch");
 		Vector3 desiredMovement = GetDesiredMovement(isOnFloor, _crouching);
 
-		// Normalize the movement vector to ensure consistent speed
-		if (desiredMovement.Length() > 1)
-		{
-			desiredMovement = desiredMovement.Normalized();
-		}
-
 		ApplyMovementVelocity(Player, isOnFloor, desiredMovement, Camera, delta);
 		ApplyAnimations(desiredMovement, isOnFloor, _crouching);
 		DrawDebug();
@@ -145,35 +139,14 @@ public partial class PlayerMovementController : Node
 
 			if (!desiredMovement.IsZeroApprox())
 			{
-				if (desiredMovement.Z > 0)
-				{
-					AnimationPlayer.Play("Walk forwards");
-					return;
-				}
-				if (desiredMovement.Z < 0)
-				{
-					AnimationPlayer.Play("Walk backwards");
-					return;
-				}
-				if (desiredMovement.X > 0)
-				{
-					AnimationPlayer.Play("Walk right");
-					return;
-				}
-				if (desiredMovement.X < 0)
-				{
-					AnimationPlayer.Play("Walk left");
-					return;
-				}
-
 				if (_sprinting)
 				{
-					if (desiredMovement.Z > 0)
+					if (desiredMovement.Z < 0)
 					{
 						AnimationPlayer.Play("Sprint forwards");
 						return;
 					}
-					if (desiredMovement.Z < 0)
+					if (desiredMovement.Z > 0)
 					{
 						AnimationPlayer.Play("Sprint backwards");
 						return;
@@ -188,6 +161,27 @@ public partial class PlayerMovementController : Node
 						AnimationPlayer.Play("Sprint left");
 						return;
 					}
+				}
+
+				if (desiredMovement.Z < 0)
+				{
+					AnimationPlayer.Play("Walk forwards");
+					return;
+				}
+				if (desiredMovement.Z > 0)
+				{
+					AnimationPlayer.Play("Walk backwards");
+					return;
+				}
+				if (desiredMovement.X > 0)
+				{
+					AnimationPlayer.Play("Walk right");
+					return;
+				}
+				if (desiredMovement.X < 0)
+				{
+					AnimationPlayer.Play("Walk left");
+					return;
 				}
 			}
 		}
@@ -227,6 +221,12 @@ public partial class PlayerMovementController : Node
 		if (Input.IsActionPressed("move_right"))
 		{
 			desiredMovement.X += 1;
+		}
+		
+		// Normalize the movement vector to ensure consistent speed
+		if (desiredMovement.Length() > 1)
+		{
+			desiredMovement = desiredMovement.Normalized();
 		}
 
 		if (!isOnFloor)
