@@ -24,7 +24,7 @@ script = ExtResource("2_btmad")
 CameraSettings = ExtResource("3_fj6uk")
 
 [node name="Sun" type="DirectionalLight3D" parent="."]
-transform = Transform3D(0.999102, 0.0410406, 0.0105305, -0.0403305, 0.844986, 0.533265, 0.0129875, -0.533211, 0.845882, 0, 65.2942, 0)
+transform = Transform3D(0.932965, -0.208369, 0.293528, -0.037886, 0.754061, 0.655711, -0.357968, -0.622876, 0.695618, 0, 0, 0)
 shadow_enabled = true
 
 [node name="LevelHandler" type="Node" parent="."]

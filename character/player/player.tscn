@@ -6,7 +6,9 @@
 [ext_resource type="Resource" uid="uid://dumjp22rhf4t6" path="res://character/data/player.tres" id="2_xhqsc"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_7atnd"]
+specular_mode = 1
 albedo_texture = ExtResource("1_3dm7d")
+roughness = 0.0
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_n51as"]
 resource_name = "People_texture_map"

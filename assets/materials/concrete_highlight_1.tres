@@ -1,0 +1,9 @@
+[gd_resource type="StandardMaterial3D" load_steps=2 format=3 uid="uid://l7qt03wn6v2l"]
+
+[ext_resource type="Texture2D" uid="uid://spx1k3bqss4n" path="res://assets/stone-texture-background.jpg" id="1_7xarp"]
+
+[resource]
+diffuse_mode = 3
+specular_mode = 1
+albedo_color = Color(0.363, 0, 0.66, 1)
+albedo_texture = ExtResource("1_7xarp")
