@@ -10,15 +10,17 @@ public partial class Player : CharacterBody3D
 
 	[Export] public PlayerMovementController MovementController { get; set; }
 	[Export] public CollisionShape3D Hitbox { get; set; }
+	[Export] public AnimationPlayer AnimationPlayer { get; set; }
 
 
 	public override void _Ready()
 	{
 		base._Ready();
 
-		MovementController?.Initialize(this, Hitbox, CameraController.Instance);
+		MovementController?.Initialize(this, Hitbox, CameraController.Instance, AnimationPlayer);
 
-		Events.Instance.PlayerAddHealth += OnPlayerAddHealth;
+		Events.GetInstance().PlayerAddHealth += OnPlayerAddHealth;
+
 	}
 
 	private void OnPlayerAddHealth(int amount)

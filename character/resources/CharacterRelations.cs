@@ -12,7 +12,10 @@ public partial class CharacterRelations : Resource
     {
         CharacterRelations instance = Duplicate() as CharacterRelations;
         
-        instance.Faction = Faction.CreateInstance();
+        if (instance.Faction != null)
+        {
+            instance.Faction = Faction.CreateInstance();
+        }
 
         return instance;
     }

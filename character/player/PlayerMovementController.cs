@@ -1,6 +1,5 @@
 namespace SneakGame;
 
-using System.Collections.Generic;
 using Godot;
 
 public partial class PlayerMovementController : Node
@@ -31,6 +30,7 @@ public partial class PlayerMovementController : Node
 	private CameraController Camera { get; set; }
 	private CharacterBody3D Player { get; set; }
 	private CollisionShape3D Hitbox { get; set; }
+	private AnimationPlayer AnimationPlayer { get; set; }
 
 	// Timers
 	private SceneTreeTimer _jumpTimer;
@@ -55,11 +55,12 @@ public partial class PlayerMovementController : Node
 	/// </summary>
 	/// <param name="player">The player that this movement controller is moving.</param>
 	/// <param name="camera">The camera that is attached to this movement controller.</param>
-	public void Initialize(CharacterBody3D player, CollisionShape3D hitbox, CameraController camera)
+	public void Initialize(CharacterBody3D player, CollisionShape3D hitbox, CameraController camera, AnimationPlayer animationPlayer)
 	{
 		Player = player;
 		Hitbox = hitbox;
 		Camera = camera;
+		AnimationPlayer = animationPlayer;
 
 		// Stick the camera to the player if it's not focused on anything. Might make more sense to have this elsewhere.
 		if (Camera != null)
@@ -85,12 +86,118 @@ public partial class PlayerMovementController : Node
 		_crouching = Input.IsActionPressed("move_crouch");
 		Vector3 desiredMovement = GetDesiredMovement(isOnFloor, _crouching);
 
-		ApplyMovementVelocity(Player, isOnFloor, desiredMovement, Camera, delta);
+		// Normalize the movement vector to ensure consistent speed
+		if (desiredMovement.Length() > 1)
+		{
+			desiredMovement = desiredMovement.Normalized();
+		}
 
+		ApplyMovementVelocity(Player, isOnFloor, desiredMovement, Camera, delta);
+		ApplyAnimations(desiredMovement, isOnFloor, _crouching);
 		DrawDebug();
 
 		// Ensure the camera is updated every frame. This prevents jittery camera movement.
 		Camera._Process(delta);
+	}
+
+	// This should apply:	
+	// Aim walk backwards
+	// Aim walk forwards
+	// Aim walk left
+	// Aim walk right
+	// Crouch backwards
+	// Crouch forwards
+	// Crouch left
+	// Crouch right
+	// Crouch to stand
+	// Dodge backwards
+	// Dodge forwards
+	// Dodge left
+	// Dodge right
+	// Fall
+	// Idle
+	// Jump running
+	// Jump stationary
+	// Kick
+	// Land
+	// Sprint backwards
+	// Sprint end
+	// Sprint forwards
+	// Sprint forwards_001
+	// Sprint left
+	// Sprint right
+	// Stand to crouch
+	// Walk backwards
+	// Walk forwards
+	// Walk left
+	// Walk right
+	private void ApplyAnimations(Vector3 desiredMovement, bool isOnFloor, bool crouching)
+	{
+		if (AnimationPlayer == null) return;
+
+		if (isOnFloor)
+		{
+			if (_jumping)
+			{
+				AnimationPlayer.Play("Jump stationary");
+				return;
+			}
+
+			if (!desiredMovement.IsZeroApprox())
+			{
+				if (desiredMovement.Z > 0)
+				{
+					AnimationPlayer.Play("Walk forwards");
+					return;
+				}
+				if (desiredMovement.Z < 0)
+				{
+					AnimationPlayer.Play("Walk backwards");
+					return;
+				}
+				if (desiredMovement.X > 0)
+				{
+					AnimationPlayer.Play("Walk right");
+					return;
+				}
+				if (desiredMovement.X < 0)
+				{
+					AnimationPlayer.Play("Walk left");
+					return;
+				}
+
+				if (_sprinting)
+				{
+					if (desiredMovement.Z > 0)
+					{
+						AnimationPlayer.Play("Sprint forwards");
+						return;
+					}
+					if (desiredMovement.Z < 0)
+					{
+						AnimationPlayer.Play("Sprint backwards");
+						return;
+					}
+					if (desiredMovement.X > 0)
+					{
+						AnimationPlayer.Play("Sprint right");
+						return;
+					}
+					if (desiredMovement.X < 0)
+					{
+						AnimationPlayer.Play("Sprint left");
+						return;
+					}
+				}
+			}
+		}
+		else
+		{
+			AnimationPlayer.Play("Fall");
+			return;
+		}
+
+		AnimationPlayer.Play("Idle");
 	}
 
 	/// <summary>
