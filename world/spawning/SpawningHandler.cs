@@ -24,6 +24,8 @@ public partial class SpawningHandler : Node
 
     private void SpawnPlayer()
     {
+        if (!Enabled) return;
+
         SpawnPoint spawnPoint = GetRandomSpawnPoint();
         if (spawnPoint != null)
         {

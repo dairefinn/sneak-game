@@ -16,7 +16,7 @@ public partial class PlayerMovementController : Node
 
 	[ExportGroup("Physics")]
 	[Export] public Vector3 Gravity = new(0, -25f, 0);
-	[Export] public int MovementSpeed = 10;
+	[Export] public int MovementSpeed = 5;
 	[Export] public int JumpVelocity = 10;
 	[Export] public float JumpDuration = 0.5f;
 	[Export] public float DoubleJumpThreshold = 1f;
@@ -30,7 +30,7 @@ public partial class PlayerMovementController : Node
 	private CameraController Camera { get; set; }
 	private CharacterBody3D Player { get; set; }
 	private CollisionShape3D Hitbox { get; set; }
-	private AnimationPlayer AnimationPlayer { get; set; }
+	private AnimationTree AnimationTree { get; set; }
 
 	// Timers
 	private SceneTreeTimer _jumpTimer;
@@ -55,12 +55,12 @@ public partial class PlayerMovementController : Node
 	/// </summary>
 	/// <param name="player">The player that this movement controller is moving.</param>
 	/// <param name="camera">The camera that is attached to this movement controller.</param>
-	public void Initialize(CharacterBody3D player, CollisionShape3D hitbox, CameraController camera, AnimationPlayer animationPlayer)
+	public void Initialize(CharacterBody3D player, CollisionShape3D hitbox, CameraController camera, AnimationTree animationTree)
 	{
 		Player = player;
 		Hitbox = hitbox;
 		Camera = camera;
-		AnimationPlayer = animationPlayer;
+		AnimationTree = animationTree;
 
 		// Stick the camera to the player if it's not focused on anything. Might make more sense to have this elsewhere.
 		if (Camera != null)
@@ -127,71 +127,81 @@ public partial class PlayerMovementController : Node
 	// Walk right
 	private void ApplyAnimations(Vector3 desiredMovement, bool isOnFloor, bool crouching)
 	{
-		if (AnimationPlayer == null) return;
+		if (AnimationTree == null) return;
 
-		if (isOnFloor)
-		{
-			if (_jumping)
-			{
-				AnimationPlayer.Play("Jump stationary");
-				return;
-			}
+		AnimationTree.Set("parameters/conditions/idle", desiredMovement == Vector3.Zero);
+		AnimationTree.Set("parameters/conditions/walk_forward", desiredMovement.Z < 0);
+		AnimationTree.Set("parameters/conditions/walk_backward", desiredMovement.Z > 0);
+		AnimationTree.Set("parameters/conditions/walk_left", desiredMovement.X < 0);
+		AnimationTree.Set("parameters/conditions/walk_right", desiredMovement.X > 0);
+		AnimationTree.Set("parameters/conditions/sprinting", _sprinting);
+		AnimationTree.Set("parameters/conditions/falling", !isOnFloor);
+		AnimationTree.Set("parameters/conditions/landed", isOnFloor);
+		AnimationTree.Set("parameters/conditions/jumping", _jumping);
 
-			if (!desiredMovement.IsZeroApprox())
-			{
-				if (_sprinting)
-				{
-					if (desiredMovement.Z < 0)
-					{
-						AnimationPlayer.Play("Sprint forwards");
-						return;
-					}
-					if (desiredMovement.Z > 0)
-					{
-						AnimationPlayer.Play("Sprint backwards");
-						return;
-					}
-					if (desiredMovement.X > 0)
-					{
-						AnimationPlayer.Play("Sprint right");
-						return;
-					}
-					if (desiredMovement.X < 0)
-					{
-						AnimationPlayer.Play("Sprint left");
-						return;
-					}
-				}
+		// if (isOnFloor)
+		// {
+		// 	if (_jumping)
+		// 	{
+		// 		AnimationPlayer.Play("Jump stationary");
+		// 		return;
+		// 	}
 
-				if (desiredMovement.Z < 0)
-				{
-					AnimationPlayer.Play("Walk forwards");
-					return;
-				}
-				if (desiredMovement.Z > 0)
-				{
-					AnimationPlayer.Play("Walk backwards");
-					return;
-				}
-				if (desiredMovement.X > 0)
-				{
-					AnimationPlayer.Play("Walk right");
-					return;
-				}
-				if (desiredMovement.X < 0)
-				{
-					AnimationPlayer.Play("Walk left");
-					return;
-				}
-			}
-		}
-		else
-		{
-			AnimationPlayer.Play("Fall");
-			return;
-		}
+		// 	if (!desiredMovement.IsZeroApprox())
+		// 	{
+		// 		if (_sprinting)
+		// 		{
+		// 			if (desiredMovement.Z < 0)
+		// 			{
+		// 				AnimationPlayer.Play("Sprint forwards");
+		// 				return;
+		// 			}
+		// 			if (desiredMovement.Z > 0)
+		// 			{
+		// 				AnimationPlayer.Play("Sprint backwards");
+		// 				return;
+		// 			}
+		// 			if (desiredMovement.X > 0)
+		// 			{
+		// 				AnimationPlayer.Play("Sprint right");
+		// 				return;
+		// 			}
+		// 			if (desiredMovement.X < 0)
+		// 			{
+		// 				AnimationPlayer.Play("Sprint left");
+		// 				return;
+		// 			}
+		// 		}
 
-		AnimationPlayer.Play("Idle");
+		// 		if (desiredMovement.Z < 0)
+		// 		{
+		// 			AnimationPlayer.Play("Walk forwards");
+		// 			return;
+		// 		}
+		// 		if (desiredMovement.Z > 0)
+		// 		{
+		// 			AnimationPlayer.Play("Walk backwards");
+		// 			return;
+		// 		}
+		// 		if (desiredMovement.X > 0)
+		// 		{
+		// 			AnimationPlayer.Play("Walk right");
+		// 			return;
+		// 		}
+		// 		if (desiredMovement.X < 0)
+		// 		{
+		// 			AnimationPlayer.Play("Walk left");
+		// 			return;
+		// 		}
+		// 	}
+		// }
+		// else
+		// {
+		// 	AnimationPlayer.Play("Fall");
+		// 	return;
+		// }
+
+		// AnimationPlayer.Play("Idle");
 	}
 
 	/// <summary>

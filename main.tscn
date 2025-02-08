@@ -17,10 +17,11 @@ radius = 1.5
 
 [node name="Main" type="Node3D"]
 
-[node name="MainCamera" type="Camera3D" parent="."]
+[node name="MainCamera" type="Camera3D" parent="." node_paths=PackedStringArray("FocusedEntity")]
 transform = Transform3D(0.999998, 0.00193988, -0.000959941, -0.00194208, 0.999995, -0.00230014, 0.000955475, 0.002302, 0.999997, 13.3406, 2.13342, 3.89499)
 current = true
 script = ExtResource("2_btmad")
+FocusedEntity = NodePath("../Player")
 CameraSettings = ExtResource("3_fj6uk")
 
 [node name="Sun" type="DirectionalLight3D" parent="."]
@@ -58,3 +59,5 @@ shape = SubResource("CylinderShape3D_uxww8")
 [node name="InventoryContainerUI" parent="." instance=ExtResource("10_v6t3p")]
 
 [node name="CharacterStatsUI" parent="." instance=ExtResource("11_q4bmc")]
+
+[node name="Player" parent="." instance=ExtResource("2_8hm8e")]
