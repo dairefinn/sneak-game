@@ -2,23 +2,23 @@ namespace SneakGame;
 
 using Godot;
 
-public partial class CameraController : Camera3D
+public partial class CameraController : Node3D
 {
-	
-	public static CameraController Instance { get; private set; }
 
+	[Export] public Camera3D MainCamera { get; set; } = null;
 	[Export] public Node3D FocusedEntity { get; set; } = null;
 	[Export] public CameraSettings CameraSettings { get; set; }
 	[Export] public bool RotateToFocusedEntity { get; set; } = true;
 
 
+	private SpringArm3D SpringArm = null;
 	private Vector3 FocusPoint = new(0, 0, 0);
 
 
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
-		Instance = this;
+		SpringArm = GetChild<SpringArm3D>(0);
 		Input.MouseMode = Input.MouseModeEnum.Captured;
 	}
 
@@ -44,7 +44,10 @@ public partial class CameraController : Camera3D
 
 			ApplyMouseMovementHorizontal(mouseMotion);
 			ApplyMouseMovementVertical(mouseMotion);
-			Rotation = new Vector3(Rotation.X, Rotation.Y, 0);
+			if (MainCamera != null)
+			{
+				Rotation = new Vector3(Rotation.X, Rotation.Y, 0);
+			}
 		}
 
 		if (@event is InputEventMouseButton mouseButton)
@@ -56,6 +59,8 @@ public partial class CameraController : Camera3D
 
 	public void FocusCamera(bool rotateToEntity = true)
 	{
+		if (MainCamera == null) return;
+
 		// If we have a focused entity, focus the camera on it
 		if (FocusedEntity != null)
 		{
@@ -66,7 +71,7 @@ public partial class CameraController : Camera3D
 		Vector3 newPosition = FocusPoint;
 
 		// Apply the camera distance
-		newPosition += GlobalTransform.Basis.Z * CameraSettings.Distance;
+		// newPosition += GlobalTransform.Basis.Z * CameraSettings.Distance;
 
 		// Apply the camera rotation to the target entity
 		if (FocusedEntity != null && rotateToEntity)
@@ -82,6 +87,7 @@ public partial class CameraController : Camera3D
 	// This will rotate the camera around the focus point at the desired distance
 	public void ApplyMouseMovementHorizontal(InputEventMouseMotion mouseMotion)
 	{
+		if (MainCamera == null) return;
 		if (!CameraSettings.RotateWithMouseHorizontal) return;
 
 		float rotateAmount = mouseMotion.Relative.X;
@@ -92,6 +98,7 @@ public partial class CameraController : Camera3D
 
 	public void ApplyMouseMovementVertical(InputEventMouseMotion mouseMotion)
 	{
+		if (MainCamera == null) return;
 		if (!CameraSettings.RotateWithMouseVertical) return;
 
 		float ROTATION_LIMIT_DEGREES = 45;
@@ -128,12 +135,12 @@ public partial class CameraController : Camera3D
 
 		if (mouseMotion.IsActionPressed("zoom_in"))
 		{
-			CameraSettings.Distance -= 0.1f;
+			SpringArm.SpringLength -= 0.1f;
 		}
 
 		if (mouseMotion.IsActionPressed("zoom_out"))
 		{
-			CameraSettings.Distance += 0.1f;
+			SpringArm.SpringLength += 0.1f;
 		}
 	}
 }

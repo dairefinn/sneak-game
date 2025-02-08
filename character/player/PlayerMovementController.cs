@@ -61,15 +61,6 @@ public partial class PlayerMovementController : Node
 		Hitbox = hitbox;
 		Camera = camera;
 		AnimationTree = animationTree;
-
-		// Stick the camera to the player if it's not focused on anything. Might make more sense to have this elsewhere.
-		if (Camera != null)
-		{
-			if (Camera.FocusedEntity == null)
-			{
-				Camera.FocusedEntity = Player;
-			}
-		}
 	}
 
 	/// <summary>
@@ -86,12 +77,12 @@ public partial class PlayerMovementController : Node
 		_crouching = Input.IsActionPressed("move_crouch");
 		Vector3 desiredMovement = GetDesiredMovement(isOnFloor, _crouching);
 
-		ApplyMovementVelocity(Player, isOnFloor, desiredMovement, Camera, delta);
+		ApplyMovementVelocity(isOnFloor, desiredMovement, delta);
 		ApplyAnimations(desiredMovement, isOnFloor, _crouching);
 		DrawDebug();
 
 		// Ensure the camera is updated every frame. This prevents jittery camera movement.
-		Camera._Process(delta);
+		Camera?._Process(delta);
 	}
 
 	// This should apply:	
@@ -285,7 +276,7 @@ public partial class PlayerMovementController : Node
 	/// </summary>
 	/// <param name="desiredMovement">Where the player wants to move based on the inputs pressed.</param>
 	/// <param name="delta">The time since the last frame.</param>
-	private void ApplyMovementVelocity(CharacterBody3D player, bool isOnFloor, Vector3 desiredMovement, CameraController camera, double delta)
+	private void ApplyMovementVelocity(bool isOnFloor, Vector3 desiredMovement, double delta)
 	{
 		// Velocity
 		Vector3 newVelocity = desiredMovement;
@@ -312,15 +303,14 @@ public partial class PlayerMovementController : Node
 
 		// Movement is based on the direction of the camera.
 		// Eg - holding `move_left` will move towards the left of the camera and not the world origin
-		if (camera != null)
+		if (Camera != null)
 		{
-			newVelocity = newVelocity.Rotated(Vector3.Up, camera.Rotation.Y);
+			newVelocity = newVelocity.Rotated(Vector3.Up, Camera.Rotation.Y);
 		}
 
-		player.Velocity = newVelocity;
+		Player.Velocity = newVelocity;
 
 		_targetPosition = Player.GlobalTransform.Origin + (newVelocity * (float) delta * 10);
-		// _targetPosition = _player.GlobalTransform.Origin + newVelocity;
 
 		// Transformations
 		Vector3 hitboxScale = Vector3.One;
@@ -330,7 +320,7 @@ public partial class PlayerMovementController : Node
 		}
 		SetHitboxScaleY(hitboxScale);
 
-		player.MoveAndSlide();
+		Player.MoveAndSlide();
 	}
 
 	private void StartJumpTimer()

@@ -17,12 +17,18 @@ radius = 1.5
 
 [node name="Main" type="Node3D"]
 
-[node name="MainCamera" type="Camera3D" parent="." node_paths=PackedStringArray("FocusedEntity")]
-transform = Transform3D(0.999998, 0.00193988, -0.000959941, -0.00194208, 0.999995, -0.00230014, 0.000955475, 0.002302, 0.999997, 13.3406, 2.13342, 3.89499)
-current = true
+[node name="CameraController" type="Node3D" parent="." node_paths=PackedStringArray("MainCamera", "FocusedEntity")]
 script = ExtResource("2_btmad")
+MainCamera = NodePath("SpringArm3D/MainCamera")
 FocusedEntity = NodePath("../Player")
 CameraSettings = ExtResource("3_fj6uk")
+
+[node name="SpringArm3D" type="SpringArm3D" parent="CameraController"]
+spring_length = 5.0
+
+[node name="MainCamera" type="Camera3D" parent="CameraController/SpringArm3D"]
+transform = Transform3D(0.999998, 0.00193988, -0.000959941, -0.00194208, 0.999995, -0.00230014, 0.000955475, 0.002302, 0.999997, 13.3406, 2.13342, 3.89499)
+current = true
 
 [node name="Sun" type="DirectionalLight3D" parent="."]
 transform = Transform3D(0.932965, -0.208369, 0.293528, -0.037886, 0.754061, 0.655711, -0.357968, -0.622876, 0.695618, 0, 0, 0)
@@ -60,4 +66,5 @@ shape = SubResource("CylinderShape3D_uxww8")
 
 [node name="CharacterStatsUI" parent="." instance=ExtResource("11_q4bmc")]
 
-[node name="Player" parent="." instance=ExtResource("2_8hm8e")]
+[node name="Player" parent="." node_paths=PackedStringArray("CameraController") instance=ExtResource("2_8hm8e")]
+CameraController = NodePath("../CameraController")
