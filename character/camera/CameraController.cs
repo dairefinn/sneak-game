@@ -32,11 +32,22 @@ public partial class CameraController : Node3D
 		{
 			GetTree().Quit();
 		}
+
+		if (Input.IsActionPressed("toggle_camera_lock"))
+		{
+			Input.MouseMode = Input.MouseModeEnum.Visible;
+		}
+		else
+		{
+			Input.MouseMode = Input.MouseModeEnum.Captured;
+		}
 	}
 
     public override void _Input(InputEvent @event)
     {
         base._Input(@event);
+
+		if (Input.MouseMode == Input.MouseModeEnum.Visible) return;
 
 		if (@event is InputEventMouseMotion mouseMotion)
 		{

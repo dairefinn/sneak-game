@@ -1,6 +1,5 @@
 namespace SneakGame;
 
-using System.Collections.Generic;
 using Godot;
 
 public partial class NonPlayerMovementController : Node
@@ -9,27 +8,31 @@ public partial class NonPlayerMovementController : Node
     [Export] public float MovementSpeed { get; set; } = 3;
 	[Export] public int JumpVelocity = 5;
     [Export] public bool AffectedByGravity { get; set; } = true;
-	[Export] public Vector3 Gravity = new Vector3(0, -9.8f, 0);
+	[Export] public Vector3 Gravity = new(0, -9.8f, 0);
     
-    // The distance from the target position at which the player will consider themselves to have reached it
-    [Export] public float StopThreshold { get; set; } = 1f;
-    [Export] public Vector3 TargetPosition { get; set; }
+    [Export] public float StopThreshold { get; set; } = 1f; // The distance from the target position at which the player will consider themselves to have reached it
+    [Export] public Vector3 TargetPosition {
+        get => _targetPosition;
+        set {
+            if (_targetPosition == value) return;
+            _targetPosition = value;
+            internalTarget = value;
+        }
+    }
+    private Vector3 _targetPosition;
+    [Export ]public RayCast3D collisionRayCast;
+
 
     private NonPlayer _nonPlayer;
     private MeshInstance3D _debugMesh;
-	private bool _crouching = false;
-	private bool _jumping = false;
-
-    private Vector3? positionLastFrame;
-    private SceneTreeTimer hasMovedTimer;
-
-    private RayCast3D collisionRayCast;
+    private Vector3? positionStartOfFrame = null;
+    private Vector3? internalTarget = Vector3.Zero;
 
 
     public void Initialize(NonPlayer nonPlayer)
     {
         _nonPlayer = nonPlayer;
-        TargetPosition = _nonPlayer.GlobalTransform.Origin;
+        TargetPosition = _nonPlayer.GlobalPosition;
     }
 
 
@@ -37,22 +40,39 @@ public partial class NonPlayerMovementController : Node
     {
         base._Process(delta);
 
-        positionLastFrame = _nonPlayer.GlobalTransform.Origin;
+        if (internalTarget == null)
+        {
+            internalTarget = TargetPosition;
+        }
 
+        positionStartOfFrame = _nonPlayer.GlobalPosition;
+
+        // Get the movement vectors
         Vector3 physicsVector = GetPhysicsVector();
         Vector3 desiredMovementVector = GetDesiredMovementVector();
 
-        // Process all the vectors in the queue from the last frame
+        // Combine and apply all the vectors
         Vector3 desiredVelocity = MergeVectors([desiredMovementVector, physicsVector]);
         _nonPlayer.Velocity = desiredVelocity;
 
-        // Face the target position if not already facing itx
+        // Actually move the character
         FaceTargetDirection();
+        _nonPlayer.MoveAndSlide();
 
-        // Move the player
-        bool collidedWithSomething = _nonPlayer.MoveAndSlide();
+        if (positionStartOfFrame != null && collisionRayCast.IsColliding())
+        {
+            float distanceToTargetPrev = positionStartOfFrame.Value.DistanceTo(internalTarget.Value);
+            float distanceToTargetCurr = _nonPlayer.GlobalPosition.DistanceTo(internalTarget.Value);
 
-        // TODO: I used to check if the character had moved in the past X seconds and find a new path if they hadn't. Need to reimplement that.
+            float differenceInDistances = distanceToTargetPrev - distanceToTargetCurr;
+
+            if (differenceInDistances < 0.1f)
+            {
+                internalTarget = FindNewPath(internalTarget.Value);
+            }
+        } else if (IsNearPosition(internalTarget.Value)) {
+            internalTarget = TargetPosition;
+        }
 
         DrawDebug();
     }
@@ -60,7 +80,7 @@ public partial class NonPlayerMovementController : Node
     /// <summary>
     /// Combine all the vectors in the queue and apply them to the player. We can then limit the player's speed by the MovementSpeed property.
     /// </summary>
-    private Vector3 MergeVectors(Vector3[] vectors)
+    private static Vector3 MergeVectors(Vector3[] vectors)
     {
         if (vectors.Length == 0) return Vector3.Zero;
 
@@ -72,7 +92,8 @@ public partial class NonPlayerMovementController : Node
         }
 
         // Limit the speed of the player
-        combinedVector = combinedVector.Normalized() * MovementSpeed;
+        // FIXME: This makes the player fall at the movement speed
+        // combinedVector = combinedVector.Normalized() * MovementSpeed;
 
         return combinedVector;
     }
@@ -96,20 +117,21 @@ public partial class NonPlayerMovementController : Node
     private Vector3 GetDesiredMovementVector()
     {
         Vector3 desiredMovement = Vector3.Zero;
+        Vector3 currentPosition = _nonPlayer.GlobalPosition;
+        Vector3 targetHorizontal = new Vector3(internalTarget.Value.X, 0, internalTarget.Value.Z);
 
-        Vector3 currentPosition = _nonPlayer.GlobalTransform.Origin;
+        if (IsNearPosition(targetHorizontal, StopThreshold)) return desiredMovement;
 
-        if (IsNearPosition(TargetPosition, StopThreshold)) return desiredMovement;
-
-        // Get the normalized direction to the target position
-        desiredMovement = TargetPosition - currentPosition;
+        Vector3 directionToTarget = (targetHorizontal - currentPosition).Normalized();
+        
+        desiredMovement = directionToTarget * MovementSpeed;
 
         return desiredMovement;
     }
 
     private void FaceTargetDirection()
     {
-        Vector3 direction = _nonPlayer.GlobalPosition - TargetPosition;
+        Vector3 direction = _nonPlayer.GlobalPosition - internalTarget.Value;
 
         direction.Y = 0; // Zero out the Y component so the character doesn't angle up or down
 
@@ -141,7 +163,7 @@ public partial class NonPlayerMovementController : Node
 
     public void ClearTargets()
     {
-        TargetPosition = _nonPlayer.GlobalTransform.Origin;
+        TargetPosition = _nonPlayer.GlobalPosition;
     }
 
     private void DrawDebug()
@@ -159,18 +181,18 @@ public partial class NonPlayerMovementController : Node
         // Draw a line from the NPC to their current target
         ImmediateMesh shortTargetImmediateMesh = new();
         shortTargetImmediateMesh.SurfaceBegin(Mesh.PrimitiveType.LineStrip);
-        shortTargetImmediateMesh.SurfaceAddVertex(_nonPlayer.GlobalTransform.Origin + meshOffset);
-        shortTargetImmediateMesh.SurfaceAddVertex(TargetPosition + meshOffset);
+        shortTargetImmediateMesh.SurfaceAddVertex(_nonPlayer.GlobalPosition + meshOffset);
+        shortTargetImmediateMesh.SurfaceAddVertex(internalTarget.Value + meshOffset);
         shortTargetImmediateMesh.SurfaceEnd();
 
         // Draw a 1x1 square at TargetPosition
         ImmediateMesh internalTargetImmediateMesh = new();
         internalTargetImmediateMesh.SurfaceBegin(Mesh.PrimitiveType.LineStrip);
-        internalTargetImmediateMesh.SurfaceAddVertex(TargetPosition + meshOffset + new Vector3(-0.5f, 0, -0.5f));
-        internalTargetImmediateMesh.SurfaceAddVertex(TargetPosition + meshOffset + new Vector3(0.5f, 0, -0.5f));
-        internalTargetImmediateMesh.SurfaceAddVertex(TargetPosition + meshOffset + new Vector3(0.5f, 0, 0.5f));
-        internalTargetImmediateMesh.SurfaceAddVertex(TargetPosition + meshOffset + new Vector3(-0.5f, 0, 0.5f));
-        internalTargetImmediateMesh.SurfaceAddVertex(TargetPosition + meshOffset + new Vector3(-0.5f, 0, -0.5f));
+        internalTargetImmediateMesh.SurfaceAddVertex(internalTarget.Value + meshOffset + new Vector3(-0.5f, 0, -0.5f));
+        internalTargetImmediateMesh.SurfaceAddVertex(internalTarget.Value + meshOffset + new Vector3(0.5f, 0, -0.5f));
+        internalTargetImmediateMesh.SurfaceAddVertex(internalTarget.Value + meshOffset + new Vector3(0.5f, 0, 0.5f));
+        internalTargetImmediateMesh.SurfaceAddVertex(internalTarget.Value + meshOffset + new Vector3(-0.5f, 0, 0.5f));
+        internalTargetImmediateMesh.SurfaceAddVertex(internalTarget.Value + meshOffset + new Vector3(-0.5f, 0, -0.5f));
         internalTargetImmediateMesh.SurfaceEnd();
 
         // Draw a 1x1 square at TargetPosition
@@ -193,6 +215,39 @@ public partial class NonPlayerMovementController : Node
         combinedMesh.SurfaceSetMaterial(0, new StandardMaterial3D() { EmissionEnabled = true, AlbedoColor = Colors.Blue });
         
         _debugMesh.Mesh = combinedMesh;
+    }
+
+    /// <summary>
+    /// Find a new path around an obstacle. Reuses the IsObstacleInPath method to determine if the new path is clear. If a clear path is found after X amount of attempts, the original path is returned.
+    /// </summary>
+    /// <param name="desiredMovementDirection"></param>
+    /// <param name="internalTargetPosition"></param>
+    /// <returns></returns>
+    private Vector3 FindNewPath(Vector3 internalTarget)
+    {
+        int INCREMENT = 45;
+        int degreesChecked = 0;
+
+        while (collisionRayCast.IsColliding() && degreesChecked < 360)
+        {
+            // Target to the right of the player and keep rotating 45 degrees until a clear path is found
+            collisionRayCast.RotateY(INCREMENT);
+            collisionRayCast.ForceRaycastUpdate();
+            degreesChecked += INCREMENT;
+        }
+
+        collisionRayCast.Rotation = Vector3.Zero; // Reset the rotation
+
+        if (degreesChecked >= 360)
+        {
+            return internalTarget;
+        }
+        else
+        {
+            GD.Print("Found new path");
+            Vector3 newTarget = _nonPlayer.GlobalPosition + collisionRayCast.TargetPosition.Rotated(Vector3.Up, Mathf.DegToRad(degreesChecked));
+            return newTarget;
+        }
     }
 
 }

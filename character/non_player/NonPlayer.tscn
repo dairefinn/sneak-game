@@ -499,8 +499,13 @@ shape = SubResource("CapsuleShape3D_sy0pf")
 transform = Transform3D(1.00744, 0, 0, 0, 1.00744, 0, 0, 0, 1.00744, 0, 0.88874, 0)
 shape = SubResource("CapsuleShape3D_ey8qo")
 
-[node name="MovementController" type="Node" parent="."]
+[node name="RayCast3D" type="RayCast3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 0.5)
+target_position = Vector3(0, 0, 2)
+
+[node name="MovementController" type="Node" parent="." node_paths=PackedStringArray("collisionRayCast")]
 script = ExtResource("3_owvmm")
+collisionRayCast = NodePath("../RayCast3D")
 
 [node name="NonPlayerBrain" parent="." instance=ExtResource("4_lbudn")]
 
