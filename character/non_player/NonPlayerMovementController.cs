@@ -55,10 +55,10 @@ public partial class NonPlayerMovementController : Node
         Vector3 desiredVelocity = MergeVectors([desiredMovementVector, physicsVector]);
         _nonPlayer.Velocity = desiredVelocity;
 
-        // Actually move the character
-        FaceTargetDirection();
-        _nonPlayer.MoveAndSlide();
+        // Lerp the velocity
+        // _nonPlayer.Velocity = _nonPlayer.Velocity.LinearInterpolate(desiredVelocity, 0.1f);
 
+        // Collison handling
         if (positionStartOfFrame != null && collisionRayCast.IsColliding())
         {
             float distanceToTargetPrev = positionStartOfFrame.Value.DistanceTo(internalTarget.Value);
@@ -73,6 +73,10 @@ public partial class NonPlayerMovementController : Node
         } else if (IsNearPosition(internalTarget.Value)) {
             internalTarget = TargetPosition;
         }
+
+        // Actually move the character
+        FaceTargetDirection();
+        _nonPlayer.MoveAndSlide();
 
         DrawDebug();
     }
