@@ -20,12 +20,10 @@ public partial class NonPlayerMovementController : Node
 	private bool _crouching = false;
 	private bool _jumping = false;
 
-    private Vector3? previousPosition;
+    private Vector3? positionLastFrame;
     private SceneTreeTimer hasMovedTimer;
 
     private RayCast3D collisionRayCast;
-
-    private Queue<Vector3> _vectorQueue = new();
 
 
     public void Initialize(NonPlayer nonPlayer)
@@ -39,10 +37,13 @@ public partial class NonPlayerMovementController : Node
     {
         base._Process(delta);
 
-        previousPosition = _nonPlayer.GlobalTransform.Origin;
+        positionLastFrame = _nonPlayer.GlobalTransform.Origin;
+
+        Vector3 physicsVector = GetPhysicsVector();
+        Vector3 desiredMovementVector = GetDesiredMovementVector();
 
         // Process all the vectors in the queue from the last frame
-        Vector3 desiredVelocity = MergeVectorQueue();
+        Vector3 desiredVelocity = MergeVectors([desiredMovementVector, physicsVector]);
         _nonPlayer.Velocity = desiredVelocity;
 
         // Face the target position if not already facing itx
@@ -53,37 +54,21 @@ public partial class NonPlayerMovementController : Node
 
         // TODO: I used to check if the character had moved in the past X seconds and find a new path if they hadn't. Need to reimplement that.
 
-        // Queue all the vectors we want to apply to the player in the next frame
-        Vector3 physicsVector = GetPhysicsVector();
-        QueueVector(physicsVector);
-
-        Vector3 desiredMovementVector = GetDesiredMovementVector();
-        QueueVector(desiredMovementVector);
-
         DrawDebug();
-    }
-
-    public void QueueVector(Vector3 vector)
-    {
-        _vectorQueue.Enqueue(vector);
-    }
-
-    public void QueueVector(Vector2 vector)
-    {
-        _vectorQueue.Enqueue(new Vector3(vector.X, 0, vector.Y));
     }
 
     /// <summary>
     /// Combine all the vectors in the queue and apply them to the player. We can then limit the player's speed by the MovementSpeed property.
     /// </summary>
-    private Vector3 MergeVectorQueue()
+    private Vector3 MergeVectors(Vector3[] vectors)
     {
-        if (_vectorQueue.Count == 0) return Vector3.Zero;
+        if (vectors.Length == 0) return Vector3.Zero;
 
         Vector3 combinedVector = Vector3.Zero;
-        while (_vectorQueue.Count > 0)
+
+        foreach (Vector3 vector in vectors)
         {
-            combinedVector += _vectorQueue.Dequeue();
+            combinedVector += vector;
         }
 
         // Limit the speed of the player
@@ -159,7 +144,7 @@ public partial class NonPlayerMovementController : Node
         TargetPosition = _nonPlayer.GlobalTransform.Origin;
     }
 
-    public void DrawDebug()
+    private void DrawDebug()
     {
         if (!NavigationServer3D.GetDebugEnabled()) return; // Only show if Show Navigation debug is enabled
 
