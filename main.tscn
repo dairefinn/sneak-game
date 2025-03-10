@@ -2,11 +2,11 @@
 
 [ext_resource type="PackedScene" uid="uid://dksfr8nd8sx31" path="res://world/levels/level_testing/level_testing.tscn" id="1_1wx7x"]
 [ext_resource type="PackedScene" uid="uid://di33ivj0tqhie" path="res://character/player/player.tscn" id="2_8hm8e"]
-[ext_resource type="Script" path="res://character/camera/CameraController.cs" id="2_btmad"]
+[ext_resource type="Script" uid="uid://d4df632u265qg" path="res://character/camera/CameraController.cs" id="2_btmad"]
 [ext_resource type="Resource" uid="uid://cisethjnr0wmk" path="res://character/camera/camera_settings/camera_thirdperson.tres" id="3_fj6uk"]
-[ext_resource type="Script" path="res://world/levels/LevelHandler.cs" id="4_g887l"]
+[ext_resource type="Script" uid="uid://do5wesg7kh8hi" path="res://world/levels/LevelHandler.cs" id="4_g887l"]
 [ext_resource type="PackedScene" uid="uid://byviaf7ni73qp" path="res://ui/crosshair.tscn" id="5_hlfm5"]
-[ext_resource type="Script" path="res://world/spawning/SpawningHandler.cs" id="6_cr3jo"]
+[ext_resource type="Script" uid="uid://bgd1qeyoalkg2" path="res://world/spawning/SpawningHandler.cs" id="6_cr3jo"]
 [ext_resource type="PackedScene" uid="uid://b8cokptk8xr4f" path="res://character/non_player/NonPlayer.tscn" id="8_pgai2"]
 [ext_resource type="Resource" uid="uid://dae7g51jfv2nn" path="res://character/data/lead_researcher.tres" id="9_kryet"]
 [ext_resource type="PackedScene" uid="uid://bcy8iq3a45jt1" path="res://item/ui/inventory_container_ui.tscn" id="10_v6t3p"]
@@ -24,10 +24,9 @@ FocusedEntity = NodePath("../Player")
 CameraSettings = ExtResource("3_fj6uk")
 
 [node name="SpringArm3D" type="SpringArm3D" parent="CameraController"]
-spring_length = 5.0
+spring_length = 3.0
 
 [node name="MainCamera" type="Camera3D" parent="CameraController/SpringArm3D"]
-transform = Transform3D(0.999998, 0.00193988, -0.000959941, -0.00194208, 0.999995, -0.00230014, 0.000955475, 0.002302, 0.999997, 13.3406, 2.13342, 3.89499)
 current = true
 
 [node name="Sun" type="DirectionalLight3D" parent="."]
@@ -53,7 +52,7 @@ CharacterStatsUI = NodePath("../CharacterStatsUI")
 collision_mask = 0
 
 [node name="NonPlayer" parent="." instance=ExtResource("8_pgai2")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.17897, 0.696493, -3.18306)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 0, 5)
 Character = ExtResource("9_kryet")
 
 [node name="NpcInteractionArea" type="Area3D" parent="NonPlayer"]

@@ -12,12 +12,12 @@ public partial class NpcActionPatrol : NonPlayerAction
 	public override Type ActionType { get; set; } = Type.PATROL;
 
     [Export] public float MovementSpeed = 3;
-    [Export] public float TargetReachedThreshold = 1;
     [Export] public Array<Vector3> Path = new();
     [Export] public NonPlayer NonPlayer { get; set; }
     [Export] public NonPlayerMovementController MovementController { get; set; }
 
 
+    // TODO: Can we just use MovementController.TargetPosition instead of tracking this twice?
     public Vector3? CurrentTarget;
 
     private MeshInstance3D _pathMesh;
@@ -28,25 +28,24 @@ public partial class NpcActionPatrol : NonPlayerAction
     {
         if (!CanExecute()) return;
 
+        // If the target is null, find the nearest point on the path and set it as the target for next frame
         if (CurrentTarget == null)
         {
             GD.Print("CurrentTarget is null. Looking for nearest point on path.");
             CurrentTarget = GetNearestPointOnPath(NonPlayer.GlobalTransform.Origin);
+            return;
         }
 
-        if(CurrentTarget == null) return;
-
         Vector3 currentTargetUsing = (Vector3) CurrentTarget;
-
-        if (MovementController.IsNearPosition(currentTargetUsing, TargetReachedThreshold))
+        if (MovementController.IsNearPosition(currentTargetUsing))
         {
+            GD.Print("Reached target: " + currentTargetUsing);
             CurrentTarget = GetNextTargetOnPath(currentTargetUsing);
         }
 
         if (!patrolStarted)
         {
             MovementController.TargetPosition = currentTargetUsing;
-            MovementController.StopThreshold = TargetReachedThreshold;
             MovementController.MovementSpeed = MovementSpeed;
         }
        
@@ -75,7 +74,7 @@ public partial class NpcActionPatrol : NonPlayerAction
 
         return Path[nextIndex];
     }
-    
+
     private Vector3 GetNearestPointOnPath(Vector3 currentPosition)
     {
         Vector3 nearestPoint = Path[0];
@@ -134,8 +133,8 @@ public partial class NpcActionPatrol : NonPlayerAction
             for (int i = 0; i < 360; i += 45) // The increment here will determine the number of points in the circle (90 = 4 points, 45 = 8 points, etc.)
             {
                 float angle = Mathf.DegToRad(i);
-                float x = Mathf.Cos(angle) * TargetReachedThreshold;
-                float z = Mathf.Sin(angle) * TargetReachedThreshold;
+                float x = Mathf.Cos(angle) * MovementController.StopThreshold;
+                float z = Mathf.Sin(angle) * MovementController.StopThreshold;
                 Vector3 circlePoint = new Vector3(x, 0, z) + point;
                 circlePoint += meshOffset;
                 if (firstPoint == null) firstPoint = circlePoint;

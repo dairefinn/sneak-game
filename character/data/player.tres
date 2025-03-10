@@ -1,12 +1,12 @@
 [gd_resource type="Resource" script_class="Character" load_steps=30 format=3 uid="uid://dumjp22rhf4t6"]
 
-[ext_resource type="Script" path="res://character/resources/Character.cs" id="1_gcbhc"]
-[ext_resource type="Script" path="res://character/resources/CharacterAttributes.cs" id="1_ld0oq"]
+[ext_resource type="Script" uid="uid://bjdkxi1q08jmr" path="res://character/resources/Character.cs" id="1_gcbhc"]
+[ext_resource type="Script" uid="uid://q1myojkkfol4" path="res://character/resources/CharacterAttributes.cs" id="1_ld0oq"]
 [ext_resource type="Resource" uid="uid://bx8wddlbu23g7" path="res://world/factions/unaffiliated.tres" id="2_phbh2"]
-[ext_resource type="Script" path="res://item/ItemSlot.cs" id="2_s7ldx"]
-[ext_resource type="Script" path="res://item/ItemContainer.cs" id="3_crd61"]
-[ext_resource type="Script" path="res://character/resources/CharacterRelations.cs" id="3_hestj"]
-[ext_resource type="Script" path="res://character/resources/CharacterStats.cs" id="4_ghmou"]
+[ext_resource type="Script" uid="uid://x0bhq3lqh8n8" path="res://item/ItemSlot.cs" id="2_s7ldx"]
+[ext_resource type="Script" uid="uid://c52scbukm15bb" path="res://item/ItemContainer.cs" id="3_crd61"]
+[ext_resource type="Script" uid="uid://cm5cmud568mm8" path="res://character/resources/CharacterRelations.cs" id="3_hestj"]
+[ext_resource type="Script" uid="uid://doyewuuacq7jq" path="res://character/resources/CharacterStats.cs" id="4_ghmou"]
 
 [sub_resource type="Resource" id="Resource_2gph8"]
 script = ExtResource("1_ld0oq")
@@ -90,7 +90,7 @@ Quantity = 0
 [sub_resource type="Resource" id="Resource_yy5yw"]
 script = ExtResource("3_crd61")
 Name = "Player inventory"
-Slots = [SubResource("Resource_awg00"), SubResource("Resource_e206k"), SubResource("Resource_c48ws"), SubResource("Resource_vjm2i"), SubResource("Resource_1usse"), SubResource("Resource_4ive6"), SubResource("Resource_lsj6e"), SubResource("Resource_xyims"), SubResource("Resource_capao"), SubResource("Resource_rn03l"), SubResource("Resource_a2qeh"), SubResource("Resource_a5kv1"), SubResource("Resource_dipoj"), SubResource("Resource_fd2f1"), SubResource("Resource_ixnng"), SubResource("Resource_gducg"), SubResource("Resource_3t71v"), SubResource("Resource_itvhi")]
+Slots = Array[ExtResource("2_s7ldx")]([SubResource("Resource_awg00"), SubResource("Resource_e206k"), SubResource("Resource_c48ws"), SubResource("Resource_vjm2i"), SubResource("Resource_1usse"), SubResource("Resource_4ive6"), SubResource("Resource_lsj6e"), SubResource("Resource_xyims"), SubResource("Resource_capao"), SubResource("Resource_rn03l"), SubResource("Resource_a2qeh"), SubResource("Resource_a5kv1"), SubResource("Resource_dipoj"), SubResource("Resource_fd2f1"), SubResource("Resource_ixnng"), SubResource("Resource_gducg"), SubResource("Resource_3t71v"), SubResource("Resource_itvhi")])
 
 [sub_resource type="Resource" id="Resource_0c3ub"]
 script = ExtResource("3_hestj")

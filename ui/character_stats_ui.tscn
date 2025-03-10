@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://b80glou8ru3qd"]
 
-[ext_resource type="Script" path="res://ui/CharacterStatsUI.cs" id="1_u6k47"]
+[ext_resource type="Script" uid="uid://k3d7ppqu5j1e" path="res://ui/CharacterStatsUI.cs" id="1_u6k47"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_pfgu4"]
 line_spacing = 0.0

@@ -1,8 +1,9 @@
-[gd_resource type="Resource" script_class="ItemContainer" load_steps=2 format=3 uid="uid://cyj5lliwn4xis"]
+[gd_resource type="Resource" script_class="ItemContainer" load_steps=3 format=3 uid="uid://cyj5lliwn4xis"]
 
-[ext_resource type="Script" path="res://item/ItemContainer.cs" id="1_av2jb"]
+[ext_resource type="Script" uid="uid://c52scbukm15bb" path="res://item/ItemContainer.cs" id="1_av2jb"]
+[ext_resource type="Script" uid="uid://x0bhq3lqh8n8" path="res://item/ItemSlot.cs" id="1_xxb7s"]
 
 [resource]
 script = ExtResource("1_av2jb")
 Name = ""
-Slots = []
+Slots = Array[ExtResource("1_xxb7s")]([])

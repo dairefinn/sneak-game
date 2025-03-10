@@ -23,6 +23,7 @@ size = Vector3(10, 10, 10)
 shape = SubResource("BoxShape3D_vi3x2")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="CollisionShape3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
 material_override = ExtResource("2_emplo")
 mesh = SubResource("BoxMesh_ips4a")
 skeleton = NodePath("")

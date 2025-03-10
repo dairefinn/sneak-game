@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://wybur8q8o38i"]
 
-[ext_resource type="Script" path="res://character/non_player/decision_making/NonPlayerBrain.cs" id="1_o1nj3"]
+[ext_resource type="Script" uid="uid://bcj1160gehybd" path="res://character/non_player/decision_making/NonPlayerBrain.cs" id="1_o1nj3"]
 
 [node name="NonPlayerBrain" type="Node"]
 script = ExtResource("1_o1nj3")

@@ -64,7 +64,7 @@ public partial class NonPlayerBrain : Node
 		NonPlayerAction newState = Actions[to];
 		if (newState == null) return;
 
-		GD.Print($"Transitioning from {from?.ActionType} to {to}");
+		GD.Print($"Transitioning from {from?.ActionType.ToString() ?? "NO STATE"} to {to}");
 
 		CurrentAction?.Exit();
 

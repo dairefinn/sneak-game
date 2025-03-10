@@ -2,11 +2,11 @@
 
 [ext_resource type="Resource" uid="uid://btt40xm8n2yqo" path="res://world/factions/bandits.tres" id="1_pi4vl"]
 [ext_resource type="Resource" uid="uid://c40bp6fsohvmc" path="res://world/factions/cultists.tres" id="2_snan0"]
-[ext_resource type="Script" path="res://world/factions/resources/FactionRelationLink.cs" id="3_p7b1k"]
+[ext_resource type="Script" uid="uid://dnpmyiw6sgexw" path="res://world/factions/resources/FactionRelationLink.cs" id="3_p7b1k"]
 [ext_resource type="Resource" uid="uid://8h1as1seyrn8" path="res://world/factions/military.tres" id="4_jvugv"]
 [ext_resource type="Resource" uid="uid://bwrco8ojw8kx8" path="res://world/factions/scientists.tres" id="5_r2nne"]
 [ext_resource type="Resource" uid="uid://bx8wddlbu23g7" path="res://world/factions/unaffiliated.tres" id="6_x6pah"]
-[ext_resource type="Script" path="res://world/factions/resources/FactionRelations.cs" id="7_e1yd1"]
+[ext_resource type="Script" uid="uid://dvvos7ju26pjv" path="res://world/factions/resources/FactionRelations.cs" id="7_e1yd1"]
 
 [sub_resource type="Resource" id="Resource_56edk"]
 script = ExtResource("3_p7b1k")
@@ -70,4 +70,4 @@ Affinity = 0.0
 
 [resource]
 script = ExtResource("7_e1yd1")
-Links = [SubResource("Resource_56edk"), SubResource("Resource_s1a6q"), SubResource("Resource_256qx"), SubResource("Resource_rdpqo"), SubResource("Resource_3lxos"), SubResource("Resource_lmpul"), SubResource("Resource_y2rwo"), SubResource("Resource_7b1u8"), SubResource("Resource_exk12"), SubResource("Resource_iil12")]
+Links = Array[ExtResource("3_p7b1k")]([SubResource("Resource_56edk"), SubResource("Resource_s1a6q"), SubResource("Resource_256qx"), SubResource("Resource_rdpqo"), SubResource("Resource_3lxos"), SubResource("Resource_lmpul"), SubResource("Resource_y2rwo"), SubResource("Resource_7b1u8"), SubResource("Resource_exk12"), SubResource("Resource_iil12")])

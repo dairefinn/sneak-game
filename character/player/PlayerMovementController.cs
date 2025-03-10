@@ -46,6 +46,7 @@ public partial class PlayerMovementController : Node
 	private bool _jumping = false;
 	private bool _crouching = false;
 
+	public Vector3 desiredMovement = Vector3.Zero;
 	private Vector3 _targetPosition = Vector3.Zero;
 	private MeshInstance3D _debugMesh;
 
@@ -75,7 +76,7 @@ public partial class PlayerMovementController : Node
 		bool isOnFloor = Player.IsOnFloor();
 
 		_crouching = Input.IsActionPressed("move_crouch");
-		Vector3 desiredMovement = GetDesiredMovement(isOnFloor, _crouching);
+		desiredMovement = GetDesiredMovement(isOnFloor, _crouching);
 
 		ApplyMovementVelocity(isOnFloor, desiredMovement, delta);
 		ApplyAnimations(desiredMovement, isOnFloor, _crouching);
@@ -120,79 +121,22 @@ public partial class PlayerMovementController : Node
 	{
 		if (AnimationTree == null) return;
 
-		AnimationTree.Set("parameters/conditions/idle", desiredMovement == Vector3.Zero);
-		AnimationTree.Set("parameters/conditions/walk_forward", desiredMovement.Z < 0);
-		AnimationTree.Set("parameters/conditions/walk_backward", desiredMovement.Z > 0);
-		AnimationTree.Set("parameters/conditions/walk_left", desiredMovement.X < 0);
-		AnimationTree.Set("parameters/conditions/walk_right", desiredMovement.X > 0);
-		AnimationTree.Set("parameters/conditions/sprinting", _sprinting);
-		AnimationTree.Set("parameters/conditions/falling", !isOnFloor);
-		AnimationTree.Set("parameters/conditions/landed", isOnFloor);
-		AnimationTree.Set("parameters/conditions/jumping", _jumping);
-
-		// if (isOnFloor)
-		// {
-		// 	if (_jumping)
-		// 	{
-		// 		AnimationPlayer.Play("Jump stationary");
-		// 		return;
-		// 	}
-
-		// 	if (!desiredMovement.IsZeroApprox())
-		// 	{
-		// 		if (_sprinting)
-		// 		{
-		// 			if (desiredMovement.Z < 0)
-		// 			{
-		// 				AnimationPlayer.Play("Sprint forwards");
-		// 				return;
-		// 			}
-		// 			if (desiredMovement.Z > 0)
-		// 			{
-		// 				AnimationPlayer.Play("Sprint backwards");
-		// 				return;
-		// 			}
-		// 			if (desiredMovement.X > 0)
-		// 			{
-		// 				AnimationPlayer.Play("Sprint right");
-		// 				return;
-		// 			}
-		// 			if (desiredMovement.X < 0)
-		// 			{
-		// 				AnimationPlayer.Play("Sprint left");
-		// 				return;
-		// 			}
-		// 		}
-
-		// 		if (desiredMovement.Z < 0)
-		// 		{
-		// 			AnimationPlayer.Play("Walk forwards");
-		// 			return;
-		// 		}
-		// 		if (desiredMovement.Z > 0)
-		// 		{
-		// 			AnimationPlayer.Play("Walk backwards");
-		// 			return;
-		// 		}
-		// 		if (desiredMovement.X > 0)
-		// 		{
-		// 			AnimationPlayer.Play("Walk right");
-		// 			return;
-		// 		}
-		// 		if (desiredMovement.X < 0)
-		// 		{
-		// 			AnimationPlayer.Play("Walk left");
-		// 			return;
-		// 		}
-		// 	}
-		// }
-		// else
-		// {
-		// 	AnimationPlayer.Play("Fall");
-		// 	return;
-		// }
-
-		// AnimationPlayer.Play("Idle");
+		AnimationTree.Set("parameters/Crouch1/blend_amount", crouching ? 1 : 0);
+		AnimationTree.Set("parameters/Crouch2/blend_amount", crouching ? 1 : 0);
+		AnimationTree.Set("parameters/Strafe/blend_amount", desiredMovement.X != 0 ? 1 : 0);
+		AnimationTree.Set("parameters/Idle/blend_amount", desiredMovement == Vector3.Zero ? 1 : 0);
+		
+		// If moving backwards, reverse the "anim_walk_forwards" animation. This is not a blend node so we need to reverse the animation using the "Play mode" property.
+		if (desiredMovement.Z > 0)
+		{
+			AnimationTree.GetAnimation("Walk forwards").Set("speed_scale", -1);
+			// GD.Print("Moving forwards: " + AnimationTree.GetAnimation("Walk forwards").Get("speed_scale"));
+		}
+		else
+		{
+			AnimationTree.GetAnimation("Walk forwards").Set("speed_scale", +1);
+			// GD.Print("Moving backwards: " + AnimationTree.GetAnimation("Walk forwards").Get("speed_scale"));
+		}
 	}
 
 	/// <summary>

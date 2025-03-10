@@ -18,27 +18,6 @@ public partial class NpcActionWalk : NonPlayerAction
     {
         if (!CanExecute()) return;
 
-        // TODO: Might make more sense to have this in the movement controller
-        // if (lastPosition != null)
-        // {
-        //     Vector3 distanceMoved = (owner.NonPlayer.GlobalTransform.Origin - lastPosition).Value;
-        //     if (distanceMoved.Length() <= 0.1f)
-        //     {
-        //         timeWithoutMoving += delta;
-        //         if (timeWithoutMoving >= 5)
-        //         {
-        //             owner.NonPlayer.MovementContoller.TargetNewRandomPositionOnMap();
-        //             timeWithoutMoving = 0;
-        //         }
-        //     }
-        //     else
-        //     {
-        //         timeWithoutMoving = 0;
-        //     }
-        // }
-
-        // lastPosition = owner.NonPlayer.GlobalTransform.Origin;
-
         Node3D newTarget = DetectionHandler.GetFirstDetectedBody<Player>();
         if (newTarget != null)
         {
@@ -46,6 +25,7 @@ public partial class NpcActionWalk : NonPlayerAction
         }
 
         Brain.NonPlayer.MovementContoller.MovementSpeed = MovementSpeed;
+        Brain.NonPlayer.MovementContoller.TargetPosition = TargetPosition;
 
         return;
     }
