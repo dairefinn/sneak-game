@@ -488,24 +488,19 @@ bone_idx = 6
 [node name="NonPlayerDetectionHandler" type="Area3D" parent="Armature/Skeleton3D/BoneAttachment3D"]
 transform = Transform3D(1, -2.24063e-09, -1.96658e-08, -1.96658e-08, -0.224951, -0.97437, -2.24064e-09, 0.97437, -0.224951, 0, 0.5, -1.8)
 collision_layer = 0
-collision_mask = 6
+collision_mask = 255
 monitorable = false
 script = ExtResource("3_cresg")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Armature/Skeleton3D/BoneAttachment3D/NonPlayerDetectionHandler"]
+[node name="Vision" type="CollisionShape3D" parent="Armature/Skeleton3D/BoneAttachment3D/NonPlayerDetectionHandler"]
 shape = SubResource("CapsuleShape3D_sy0pf")
 
 [node name="Hitbox" type="CollisionShape3D" parent="."]
 transform = Transform3D(1.00744, 0, 0, 0, 1.00744, 0, 0, 0, 1.00744, 0, 0.88874, 0)
 shape = SubResource("CapsuleShape3D_ey8qo")
 
-[node name="RayCast3D" type="RayCast3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 0.5)
-target_position = Vector3(0, 0, 2)
-
-[node name="MovementController" type="Node" parent="." node_paths=PackedStringArray("collisionRayCast")]
+[node name="MovementController" type="Node" parent="."]
 script = ExtResource("3_owvmm")
-collisionRayCast = NodePath("../RayCast3D")
 
 [node name="NonPlayerBrain" parent="." instance=ExtResource("4_lbudn")]
 

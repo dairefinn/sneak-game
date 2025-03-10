@@ -1,15 +1,16 @@
 namespace SneakGame;
 
+using System;
 using Godot;
+using Godot.Collections;
 
 public partial class NonPlayerMovementController : Node
 {
 
     [Export] public float MovementSpeed { get; set; } = 3;
-	[Export] public int JumpVelocity = 5;
+	[Export] public int JumpVelocity { get; set; } = 5;
     [Export] public bool AffectedByGravity { get; set; } = true;
-	[Export] public Vector3 Gravity = new(0, -9.8f, 0);
-    
+	[Export] public Vector3 Gravity { get; set; } = new(0, -9.8f, 0);
     [Export] public float StopThreshold { get; set; } = 1f; // The distance from the target position at which the player will consider themselves to have reached it
     [Export] public Vector3 TargetPosition {
         get => _targetPosition;
@@ -20,7 +21,6 @@ public partial class NonPlayerMovementController : Node
         }
     }
     private Vector3 _targetPosition;
-    [Export ]public RayCast3D collisionRayCast;
 
 
     private NonPlayer _nonPlayer;
@@ -47,32 +47,17 @@ public partial class NonPlayerMovementController : Node
 
         positionStartOfFrame = _nonPlayer.GlobalPosition;
 
+        internalTarget = HandleCollisions(internalTarget.Value);
+
         // Get the movement vectors
         Vector3 physicsVector = GetPhysicsVector();
         Vector3 desiredMovementVector = GetDesiredMovementVector();
 
         // Combine and apply all the vectors
         Vector3 desiredVelocity = MergeVectors([desiredMovementVector, physicsVector]);
-        _nonPlayer.Velocity = desiredVelocity;
 
         // Lerp the velocity
-        // _nonPlayer.Velocity = _nonPlayer.Velocity.LinearInterpolate(desiredVelocity, 0.1f);
-
-        // Collison handling
-        if (positionStartOfFrame != null && collisionRayCast.IsColliding())
-        {
-            float distanceToTargetPrev = positionStartOfFrame.Value.DistanceTo(internalTarget.Value);
-            float distanceToTargetCurr = _nonPlayer.GlobalPosition.DistanceTo(internalTarget.Value);
-
-            float differenceInDistances = distanceToTargetPrev - distanceToTargetCurr;
-
-            if (differenceInDistances < 0.1f)
-            {
-                internalTarget = FindNewPath(internalTarget.Value);
-            }
-        } else if (IsNearPosition(internalTarget.Value)) {
-            internalTarget = TargetPosition;
-        }
+        _nonPlayer.Velocity = _nonPlayer.Velocity.Lerp(desiredVelocity, 0.1f);
 
         // Actually move the character
         FaceTargetDirection();
@@ -135,7 +120,8 @@ public partial class NonPlayerMovementController : Node
 
     private void FaceTargetDirection()
     {
-        Vector3 direction = _nonPlayer.GlobalPosition - internalTarget.Value;
+        // Vector3 direction = _nonPlayer.GlobalPosition - internalTarget.Value;
+        Vector3 direction = _nonPlayer.Velocity.Rotated(Vector3.Up, Mathf.DegToRad(180));
 
         direction.Y = 0; // Zero out the Y component so the character doesn't angle up or down
 
@@ -221,37 +207,69 @@ public partial class NonPlayerMovementController : Node
         _debugMesh.Mesh = combinedMesh;
     }
 
-    /// <summary>
-    /// Find a new path around an obstacle. Reuses the IsObstacleInPath method to determine if the new path is clear. If a clear path is found after X amount of attempts, the original path is returned.
-    /// </summary>
-    /// <param name="desiredMovementDirection"></param>
-    /// <param name="internalTargetPosition"></param>
-    /// <returns></returns>
-    private Vector3 FindNewPath(Vector3 internalTarget)
+
+    // TODO: Instead of rotating the character, draw a path between the target and the character to find a way to reach it.
+    // Will probably need to replace the TargetPosition with an actual path to follow.
+    // This works for now but if the NPC enters a corner they'll just follow the wall to get out and it looks bad.
+    private RayCast3D collisionDetectionRay;
+    private Vector3 HandleCollisions(Vector3 targetPosition)
     {
-        int INCREMENT = 45;
-        int degreesChecked = 0;
-
-        while (collisionRayCast.IsColliding() && degreesChecked < 360)
+        // This will reset the NPC back to their original target if they reach the point they were given to avoid the obstacle
+        if (IsNearPosition(internalTarget.Value))
         {
-            // Target to the right of the player and keep rotating 45 degrees until a clear path is found
-            collisionRayCast.RotateY(INCREMENT);
-            collisionRayCast.ForceRaycastUpdate();
-            degreesChecked += INCREMENT;
+            return TargetPosition;
         }
 
-        collisionRayCast.Rotation = Vector3.Zero; // Reset the rotation
+        float DEGREE_STEP = 10f;
+        Vector3 currentPosition = _nonPlayer.GlobalPosition;
 
-        if (degreesChecked >= 360)
+        // Check if there's an obstacle in the way
+        if (IsObstacleInWay())
         {
-            return internalTarget;
+            return currentPosition + new Vector3(0, 0, 2).Rotated(Vector3.Up, _nonPlayer.Rotation.Y + Mathf.DegToRad(DEGREE_STEP));
         }
-        else
+
+        return targetPosition;
+    }
+
+    private bool IsObstacleInWay()
+    {
+        if (collisionDetectionRay == null)
         {
-            GD.Print("Found new path");
-            Vector3 newTarget = _nonPlayer.GlobalPosition + collisionRayCast.TargetPosition.Rotated(Vector3.Up, Mathf.DegToRad(degreesChecked));
-            return newTarget;
+            collisionDetectionRay = new()
+            {
+                // TopLevel = true, // Use global transforms
+                CollisionMask = 1, // Only check for obstacles
+                TargetPosition = new Vector3(0, 0, 2),
+            };
+            _nonPlayer.AddChild(collisionDetectionRay);
         }
+
+        // Position the ray just above the characters feet
+        Vector3 offset = new(0, 0.2f, 0);
+        collisionDetectionRay.GlobalPosition = _nonPlayer.GlobalPosition + offset;
+        collisionDetectionRay.GlobalRotation = _nonPlayer.GlobalRotation;
+
+        // Sweep the ray in a cone ahead of the character
+        float coneAngle = 90f;
+        int rayCount = (int)Math.Abs(coneAngle); // Number of rays to cast within the cone. Checking every degree for now but can be optimized for performance.
+        float angleStep = coneAngle / (rayCount - 1);
+
+        for (int i = 0; i < rayCount; i++)
+        {
+            float angle = -coneAngle / 2 + i * angleStep;
+            collisionDetectionRay.Rotation = new Vector3(0, Mathf.DegToRad(angle), 0);
+            collisionDetectionRay.ForceRaycastUpdate();
+
+            if (collisionDetectionRay.IsColliding())
+            {
+                collisionDetectionRay.Rotation = new Vector3(0, 0, 0);
+                return true;
+            }
+        }
+
+        collisionDetectionRay.Rotation = new Vector3(0, 0, 0);
+        return false;
     }
 
 }
