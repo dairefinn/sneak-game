@@ -17,10 +17,9 @@ radius = 1.5
 
 [node name="Main" type="Node3D"]
 
-[node name="CameraController" type="Node3D" parent="." node_paths=PackedStringArray("MainCamera", "FocusedEntity")]
+[node name="CameraController" type="Node3D" parent="." node_paths=PackedStringArray("MainCamera")]
 script = ExtResource("2_btmad")
 MainCamera = NodePath("SpringArm3D/MainCamera")
-FocusedEntity = NodePath("../Player")
 CameraSettings = ExtResource("3_fj6uk")
 
 [node name="SpringArm3D" type="SpringArm3D" parent="CameraController"]
@@ -29,24 +28,20 @@ spring_length = 3.0
 [node name="MainCamera" type="Camera3D" parent="CameraController/SpringArm3D"]
 current = true
 
-[node name="Sun" type="DirectionalLight3D" parent="."]
-transform = Transform3D(0.932965, -0.208369, 0.293528, -0.037886, 0.754061, 0.655711, -0.357968, -0.622876, 0.695618, 0, 0, 0)
-shadow_enabled = true
-
 [node name="LevelHandler" type="Node" parent="."]
 script = ExtResource("4_g887l")
 Enabled = false
 DefaultScene = ExtResource("1_1wx7x")
 
-[node name="SpawningHandler" type="Node" parent="." node_paths=PackedStringArray("CharacterStatsUI")]
+[node name="SpawningHandler" type="Node" parent="." node_paths=PackedStringArray("CharacterStatsUI", "CameraController")]
 script = ExtResource("6_cr3jo")
-Enabled = false
 PlayerScene = ExtResource("2_8hm8e")
-CharacterStatsUI = NodePath("../CharacterStatsUI")
+CharacterStatsUI = NodePath("../CanvasLayer/CharacterStatsUI")
+CameraController = NodePath("../CameraController")
 
-[node name="CanvasLayer" type="CanvasLayer" parent="."]
-
-[node name="Crosshair" parent="CanvasLayer" instance=ExtResource("5_hlfm5")]
+[node name="Sun" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.932965, -0.208369, 0.293528, -0.037886, 0.754061, 0.655711, -0.357968, -0.622876, 0.695618, 0, 0, 0)
+shadow_enabled = true
 
 [node name="LevelTesting" parent="." instance=ExtResource("1_1wx7x")]
 
@@ -60,9 +55,10 @@ Character = ExtResource("9_kryet")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
 shape = SubResource("CylinderShape3D_uxww8")
 
-[node name="InventoryContainerUI" parent="." instance=ExtResource("10_v6t3p")]
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
 
-[node name="CharacterStatsUI" parent="." instance=ExtResource("11_q4bmc")]
+[node name="Crosshair" parent="CanvasLayer" instance=ExtResource("5_hlfm5")]
 
-[node name="Player" parent="." node_paths=PackedStringArray("CameraController") instance=ExtResource("2_8hm8e")]
-CameraController = NodePath("../CameraController")
+[node name="InventoryContainerUI" parent="CanvasLayer" instance=ExtResource("10_v6t3p")]
+
+[node name="CharacterStatsUI" parent="CanvasLayer" instance=ExtResource("11_q4bmc")]

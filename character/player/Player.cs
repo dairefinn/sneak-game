@@ -1,6 +1,5 @@
 namespace SneakGame;
 
-using DeckBuilder;
 using Godot;
 
 public partial class Player : CharacterBody3D
@@ -11,14 +10,12 @@ public partial class Player : CharacterBody3D
 	[Export] public PlayerMovementController MovementController { get; set; }
 	[Export] public CollisionShape3D Hitbox { get; set; }
 	[Export] public AnimationTree AnimationTree { get; set; }
-	[Export] public CameraController CameraController { get; set; }
-
 
 	public override void _Ready()
 	{
 		base._Ready();
 
-		MovementController?.Initialize(this, Hitbox, CameraController, AnimationTree);
+		MovementController?.Initialize(this, Hitbox, AnimationTree);
 
 		Events.GetInstance().PlayerAddHealth += OnPlayerAddHealth;
 

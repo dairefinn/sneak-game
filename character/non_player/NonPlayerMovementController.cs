@@ -1,9 +1,6 @@
 namespace SneakGame;
 
-using System;
-using DeckBuilder;
 using Godot;
-using Godot.Collections;
 
 public partial class NonPlayerMovementController : Node
 {

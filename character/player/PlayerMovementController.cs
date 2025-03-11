@@ -26,8 +26,11 @@ public partial class PlayerMovementController : Node
 	[Export] public Vector3 CrouchModifier = new(1, 0.5f, 1);
 	[Export] public float SprintSpeedMultiplier = 2.0f;
 
+	[Export] public CameraController CameraController { get; set; }
+
+
 	// References
-	private CameraController Camera { get; set; }
+	
 	private CharacterBody3D Player { get; set; }
 	private CollisionShape3D Hitbox { get; set; }
 	private AnimationTree AnimationTree { get; set; }
@@ -56,11 +59,10 @@ public partial class PlayerMovementController : Node
 	/// </summary>
 	/// <param name="player">The player that this movement controller is moving.</param>
 	/// <param name="camera">The camera that is attached to this movement controller.</param>
-	public void Initialize(CharacterBody3D player, CollisionShape3D hitbox, CameraController camera, AnimationTree animationTree)
+	public void Initialize(CharacterBody3D player, CollisionShape3D hitbox, AnimationTree animationTree)
 	{
 		Player = player;
 		Hitbox = hitbox;
-		Camera = camera;
 		AnimationTree = animationTree;
 	}
 
@@ -83,7 +85,7 @@ public partial class PlayerMovementController : Node
 		DrawDebug();
 
 		// Ensure the camera is updated every frame. This prevents jittery camera movement.
-		Camera?._Process(delta);
+		CameraController?._Process(delta);
 	}
 
 	// This should apply:	
@@ -247,9 +249,9 @@ public partial class PlayerMovementController : Node
 
 		// Movement is based on the direction of the camera.
 		// Eg - holding `move_left` will move towards the left of the camera and not the world origin
-		if (Camera != null)
+		if (CameraController != null)
 		{
-			newVelocity = newVelocity.Rotated(Vector3.Up, Camera.Rotation.Y);
+			newVelocity = newVelocity.Rotated(Vector3.Up, CameraController.Rotation.Y);
 		}
 
 		Player.Velocity = newVelocity;

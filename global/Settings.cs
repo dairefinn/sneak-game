@@ -1,4 +1,4 @@
-namespace DeckBuilder;
+namespace SneakGame;
 
 using Godot;
 

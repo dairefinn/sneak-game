@@ -9,6 +9,7 @@ public partial class SpawningHandler : Node
     [Export] public bool Enabled { get; set; } = true;
     [Export] public PackedScene PlayerScene { get; set; }
     [Export] public CharacterStatsUI CharacterStatsUI { get; set; }
+    [Export] public CameraController CameraController { get; set; }
 
     public override void _Ready()
     {
@@ -50,7 +51,7 @@ public partial class SpawningHandler : Node
 
     private void CreatePlayerAt(Vector3 position)
     {
-        var player = PlayerScene.Instantiate<Player>();
+        Player player = PlayerScene.Instantiate<Player>();
         player.Character = player.Character.CreateInstance();
         player.Name = "Player";
         GetTree().CurrentScene.AddChild(player);
@@ -58,6 +59,11 @@ public partial class SpawningHandler : Node
 
         CharacterStatsUI?.SetCharacterStats(player.Character.Stats);
         GD.Print("Player spawned at " + position);
+
+        Globals.GetInstance().CurrentPlayer = player;
+
+        CameraController.FocusedEntity = player;
+        player.MovementController.CameraController = CameraController;
     }
 
 }
