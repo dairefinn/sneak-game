@@ -1,5 +1,3 @@
-#nullable enable
-
 namespace SneakGame;
 
 using System.Linq;
@@ -12,10 +10,10 @@ public partial class NonPlayerBrain : Node
 	protected Dictionary<NonPlayerAction.Type, NonPlayerAction> Actions = new();
 
 	[Export] public NonPlayerAction.Type DefaultActionType = NonPlayerAction.Type.PATROL;
-	public NonPlayer? NonPlayer;
+	[Export] public NonPlayer NonPlayer;
 
 
-	private NonPlayerAction? CurrentAction;
+	private NonPlayerAction CurrentAction;
 
 
     // Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -29,10 +27,9 @@ public partial class NonPlayerBrain : Node
 		CurrentAction?.OnInput(_event);
 	}
 
-
-	public void Initialize(NonPlayer nonPlayer)
-	{
-		NonPlayer = nonPlayer;
+    public override void _Ready()
+    {
+        base._Ready();
 
 		foreach (NonPlayerAction action in GetChildren().OfType<NonPlayerAction>())
 		{
@@ -43,9 +40,10 @@ public partial class NonPlayerBrain : Node
 		}
 
 		OnTransitionRequested(null, DefaultActionType);
-	}
+    }
 
-	public void ChangeToAction(NonPlayerAction.Type actionType)
+
+    public void ChangeToAction(NonPlayerAction.Type actionType)
 	{
 		if (CurrentAction != null)
 		{
@@ -57,7 +55,7 @@ public partial class NonPlayerBrain : Node
 		}
 	}
 
-	public void OnTransitionRequested(NonPlayerAction? from, NonPlayerAction.Type to)
+	public void OnTransitionRequested(NonPlayerAction from, NonPlayerAction.Type to)
 	{
 		if (from != CurrentAction) return;
 

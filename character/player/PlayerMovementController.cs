@@ -26,14 +26,10 @@ public partial class PlayerMovementController : Node
 	[Export] public Vector3 CrouchModifier = new(1, 0.5f, 1);
 	[Export] public float SprintSpeedMultiplier = 2.0f;
 
+	[ExportGroup("References")]
 	[Export] public CameraController CameraController { get; set; }
+	[Export] public Player Player { get; set; }
 
-
-	// References
-	
-	private CharacterBody3D Player { get; set; }
-	private CollisionShape3D Hitbox { get; set; }
-	private AnimationTree AnimationTree { get; set; }
 
 	// Timers
 	private SceneTreeTimer _jumpTimer;
@@ -53,18 +49,6 @@ public partial class PlayerMovementController : Node
 	private Vector3 _targetPosition = Vector3.Zero;
 	private MeshInstance3D _debugMesh;
 
-
-	/// <summary>
-	/// Instantiates any references that are needed for the controller to function.
-	/// </summary>
-	/// <param name="player">The player that this movement controller is moving.</param>
-	/// <param name="camera">The camera that is attached to this movement controller.</param>
-	public void Initialize(CharacterBody3D player, CollisionShape3D hitbox, AnimationTree animationTree)
-	{
-		Player = player;
-		Hitbox = hitbox;
-		AnimationTree = animationTree;
-	}
 
 	/// <summary>
 	/// Called every physics frame. This is where all the movement logic is handled.
@@ -121,23 +105,23 @@ public partial class PlayerMovementController : Node
 	// Walk right
 	private void ApplyAnimations(Vector3 desiredMovement, bool isOnFloor, bool crouching)
 	{
-		if (AnimationTree == null) return;
+		if (Player.AnimationTree == null) return;
 
-		AnimationTree.Set("parameters/Crouch1/blend_amount", crouching ? 1 : 0);
-		AnimationTree.Set("parameters/Crouch2/blend_amount", crouching ? 1 : 0);
-		AnimationTree.Set("parameters/Strafe/blend_amount", desiredMovement.X != 0 ? 1 : 0);
-		AnimationTree.Set("parameters/Idle/blend_amount", desiredMovement == Vector3.Zero ? 1 : 0);
+		Player.AnimationTree.Set("parameters/Crouch1/blend_amount", crouching ? 1 : 0);
+		Player.AnimationTree.Set("parameters/Crouch2/blend_amount", crouching ? 1 : 0);
+		Player.AnimationTree.Set("parameters/Strafe/blend_amount", desiredMovement.X != 0 ? 1 : 0);
+		Player.AnimationTree.Set("parameters/Idle/blend_amount", desiredMovement == Vector3.Zero ? 1 : 0);
 		
 		// If moving backwards, reverse the "anim_walk_forwards" animation. This is not a blend node so we need to reverse the animation using the "Play mode" property.
 		if (desiredMovement.Z > 0)
 		{
-			AnimationTree.GetAnimation("Walk forwards").Set("speed_scale", -1);
-			// GD.Print("Moving forwards: " + AnimationTree.GetAnimation("Walk forwards").Get("speed_scale"));
+			Player.AnimationTree.GetAnimation("Walk forwards").Set("speed_scale", -1);
+			// GD.Print("Moving forwards: " + Player.AnimationTree.GetAnimation("Walk forwards").Get("speed_scale"));
 		}
 		else
 		{
-			AnimationTree.GetAnimation("Walk forwards").Set("speed_scale", +1);
-			// GD.Print("Moving backwards: " + AnimationTree.GetAnimation("Walk forwards").Get("speed_scale"));
+			Player.AnimationTree.GetAnimation("Walk forwards").Set("speed_scale", +1);
+			// GD.Print("Moving backwards: " + Player.AnimationTree.GetAnimation("Walk forwards").Get("speed_scale"));
 		}
 	}
 
@@ -349,12 +333,12 @@ public partial class PlayerMovementController : Node
 
 	public void SetHitboxScaleY(Vector3 newScale)
 	{
-		if (Hitbox == null) return;
-		if (Hitbox.Scale == newScale) return;
+		if (Player.Hitbox == null) return;
+		if (Player.Hitbox.Scale == newScale) return;
 
 		Tween tween = CreateTween();
 		tween.SetTrans(Tween.TransitionType.Linear);
-		tween.TweenProperty(Hitbox, "scale", newScale, 0.025f);
+		tween.TweenProperty(Player.Hitbox, "scale", newScale, 0.025f);
 		tween.Play();
 	}
 

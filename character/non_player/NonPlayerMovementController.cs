@@ -5,6 +5,7 @@ using Godot;
 public partial class NonPlayerMovementController : Node
 {
 
+    [ExportGroup("Properties")]
     [Export] public float Speed { get; set; } = 5f;
     [Export] public float Acceleration { get; set; } = 10f;
     [Export] public bool AffectedByGravity { get; set; } = true;
@@ -15,18 +16,13 @@ public partial class NonPlayerMovementController : Node
             NavigationAgent.TargetPosition = value;
         }
     }
+
+    [ExportGroup("References")]
     [Export] public NavigationAgent3D NavigationAgent { get; set; }
+    [Export] public NonPlayer NonPlayer;
 
 
-    private NonPlayer _nonPlayer;
     private MeshInstance3D _debugMesh;
-
-
-    public void Initialize(NonPlayer nonPlayer)
-    {
-        _nonPlayer = nonPlayer;
-        TargetPosition = _nonPlayer.GlobalPosition;
-    }
 
 
     public override void _Process(double delta)
@@ -41,11 +37,11 @@ public partial class NonPlayerMovementController : Node
         Vector3 desiredVelocity = MergeVectors([desiredMovementVector, physicsVector]);
 
         // Lerp the velocity
-        _nonPlayer.Velocity = _nonPlayer.Velocity.Lerp(desiredVelocity, (float)(Acceleration * delta));
+        NonPlayer.Velocity = NonPlayer.Velocity.Lerp(desiredVelocity, (float)(Acceleration * delta));
 
         // Actually move the character
         FaceTargetDirection();
-        _nonPlayer.MoveAndSlide();
+        NonPlayer.MoveAndSlide();
 
         DrawDebug();
     }
@@ -71,7 +67,7 @@ public partial class NonPlayerMovementController : Node
     {
         Vector3 physicsVector = Vector3.Zero;
 
-        if(AffectedByGravity && !_nonPlayer.IsOnFloor())
+        if(AffectedByGravity && !NonPlayer.IsOnFloor())
         {
             physicsVector.Y += Gravity.Y;
         }
@@ -81,22 +77,22 @@ public partial class NonPlayerMovementController : Node
 
     private Vector3 GetDesiredMovementVector()
     {
-        if (!_nonPlayer.IsOnFloor()) return Vector3.Zero;
+        if (!NonPlayer.IsOnFloor()) return Vector3.Zero;
 
-        Vector3 direction = _nonPlayer.GlobalPosition.DirectionTo(NavigationAgent.GetNextPathPosition());
+        Vector3 direction = NonPlayer.GlobalPosition.DirectionTo(NavigationAgent.GetNextPathPosition());
         return direction * Speed;
     }
 
     private void FaceTargetDirection()
     {
-        Vector3 direction = _nonPlayer.Velocity.Rotated(Vector3.Up, Mathf.DegToRad(180));
+        Vector3 direction = NonPlayer.Velocity.Rotated(Vector3.Up, Mathf.DegToRad(180));
 
         direction.Y = 0; // Zero out the Y component so the character doesn't angle up or down
 
         if (!direction.IsZeroApprox())
         {
             direction = direction.Normalized(); // Normalize the direction vector
-            _nonPlayer.LookAt(_nonPlayer.GlobalPosition + direction, Vector3.Up);
+            NonPlayer.LookAt(NonPlayer.GlobalPosition + direction, Vector3.Up);
         }
     }
 
@@ -108,9 +104,9 @@ public partial class NonPlayerMovementController : Node
 
     public bool IsNearPosition(Vector3 position, float distanceThreshold)
     {
-        if (_nonPlayer == null) return false;
+        if (NonPlayer == null) return false;
 
-        float distanceToTarget = _nonPlayer.GlobalPosition.DistanceTo(position);
+        float distanceToTarget = NonPlayer.GlobalPosition.DistanceTo(position);
 
         return distanceToTarget <= distanceThreshold;
     }
@@ -135,7 +131,7 @@ public partial class NonPlayerMovementController : Node
         // Draw a line from the NPC to their current target
         ImmediateMesh shortTargetImmediateMesh = new();
         shortTargetImmediateMesh.SurfaceBegin(Mesh.PrimitiveType.LineStrip);
-        shortTargetImmediateMesh.SurfaceAddVertex(_nonPlayer.GlobalPosition + meshOffset);
+        shortTargetImmediateMesh.SurfaceAddVertex(NonPlayer.GlobalPosition + meshOffset);
         shortTargetImmediateMesh.SurfaceAddVertex(TargetPosition + meshOffset);
         shortTargetImmediateMesh.SurfaceEnd();
 

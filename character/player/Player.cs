@@ -15,10 +15,12 @@ public partial class Player : CharacterBody3D
 	{
 		base._Ready();
 
-		MovementController?.Initialize(this, Hitbox, AnimationTree);
+		if (MovementController != null)
+		{
+			MovementController.Player = this;
+		}
 
 		Events.GetInstance().PlayerAddHealth += OnPlayerAddHealth;
-
 	}
 
 	private void OnPlayerAddHealth(int amount)

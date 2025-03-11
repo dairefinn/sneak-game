@@ -13,11 +13,6 @@ public partial class SpawningHandler : Node
 
     public override void _Ready()
     {
-        SpawnPlayer();
-    }
-
-    private void Initialize()
-    {
         if (!Enabled) return;
         GD.Print("Initializing SpawningHandler");
         SpawnPlayer();

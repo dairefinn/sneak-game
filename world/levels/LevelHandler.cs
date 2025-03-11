@@ -12,11 +12,6 @@ public partial class LevelHandler : Node
 	{
 		base._Ready();
 
-		Initialize();
-	}
-
-	public void Initialize()
-	{
 		if (!Enabled) return;
 		GD.Print("LevelHandler initialized");
 		ChangeScene(DefaultScene);

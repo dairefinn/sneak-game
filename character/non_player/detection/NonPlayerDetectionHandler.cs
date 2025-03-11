@@ -1,5 +1,3 @@
-#nullable enable
-
 namespace SneakGame;
 
 using Godot;
@@ -8,9 +6,8 @@ using Godot.Collections;
 public partial class NonPlayerDetectionHandler : Area3D
 {
 
-	[Export] public Array<Node3D> DetectedBodies = new();
-
-    private NonPlayer? _nonPlayer;
+	[Export] public Array<Node3D> DetectedBodies = [];
+    [Export] public NonPlayer NonPlayer { get; set; }
 
 
     public override void _Ready()
@@ -19,12 +16,6 @@ public partial class NonPlayerDetectionHandler : Area3D
 
         BodyEntered += OnBodyEntered;
         BodyExited += OnBodyExited;
-    }
-
-
-    public void Initialize(NonPlayer nonPlayer)
-    {
-        _nonPlayer = nonPlayer;
     }
 
     // TODO: Add some timers here so that it's less jarring. eg Player is only "Detected"
@@ -38,7 +29,7 @@ public partial class NonPlayerDetectionHandler : Area3D
 
         if (body is Player player)
         {
-            _nonPlayer?.Brain.ChangeToAction(NonPlayerAction.Type.FOLLOW);
+            NonPlayer?.Brain.ChangeToAction(NonPlayerAction.Type.FOLLOW);
         }
     }
 
@@ -50,14 +41,14 @@ public partial class NonPlayerDetectionHandler : Area3D
 
         if (success && body is Player player)
         {
-            _nonPlayer?.Brain.ChangeToAction(NonPlayerAction.Type.PATROL);
+            NonPlayer?.Brain.ChangeToAction(NonPlayerAction.Type.PATROL);
         }
     }
 
     private bool BodyIsSelf(Node3D body)
     {
         if (body is not NonPlayer npc) return false;
-        if (npc != _nonPlayer) return false;
+        if (npc != NonPlayer) return false;
         return true;
     }
 
@@ -71,7 +62,7 @@ public partial class NonPlayerDetectionHandler : Area3D
 		return DetectedBodies.Contains(body);
 	}
 
-	public T? GetFirstDetectedBody<T>() where T : Node3D
+	public T GetFirstDetectedBody<T>() where T : Node3D
 	{
 		if (DetectedBodies.Count == 0) return null;
 
