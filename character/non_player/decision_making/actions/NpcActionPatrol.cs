@@ -1,5 +1,6 @@
 namespace SneakGame;
 
+using DeckBuilder;
 using Godot;
 using Godot.Collections;
 
@@ -43,10 +44,11 @@ public partial class NpcActionPatrol : NonPlayerAction
             CurrentTarget = GetNextTargetOnPath(currentTargetUsing);
         }
 
-        if (!patrolStarted)
+        if (NonPlayer.MovementContoller.TargetPosition != currentTargetUsing)
         {
+            GD.Print("Starting patrol to point " + currentTargetUsing);
             MovementController.TargetPosition = currentTargetUsing;
-            MovementController.MovementSpeed = MovementSpeed;
+            MovementController.Speed = MovementSpeed;
         }
        
         DrawDebug();
@@ -94,7 +96,7 @@ public partial class NpcActionPatrol : NonPlayerAction
 
     private void DrawDebug()
     {
-        if (!NavigationServer3D.GetDebugEnabled()) return; // Only show if Show Navigation debug is enabled
+        if (!Settings.GetInstance().DebugPathfinding) return; // Only show if Show Navigation debug is enabled
 
         // Add the mesh container to the scene
         Vector3 meshOffset = new(0, 1f, 0);
@@ -133,8 +135,8 @@ public partial class NpcActionPatrol : NonPlayerAction
             for (int i = 0; i < 360; i += 45) // The increment here will determine the number of points in the circle (90 = 4 points, 45 = 8 points, etc.)
             {
                 float angle = Mathf.DegToRad(i);
-                float x = Mathf.Cos(angle) * MovementController.StopThreshold;
-                float z = Mathf.Sin(angle) * MovementController.StopThreshold;
+                float x = Mathf.Cos(angle) * 1f;
+                float z = Mathf.Sin(angle) * 1f;
                 Vector3 circlePoint = new Vector3(x, 0, z) + point;
                 circlePoint += meshOffset;
                 if (firstPoint == null) firstPoint = circlePoint;

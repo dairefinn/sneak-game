@@ -24,7 +24,7 @@ public partial class NpcActionRun : NonPlayerAction
             Brain.NonPlayer.MovementContoller.TargetPosition = newTarget.GlobalTransform.Origin;
         }
 
-        Brain.NonPlayer.MovementContoller.MovementSpeed = MovementSpeed;
+        Brain.NonPlayer.MovementContoller.Speed = MovementSpeed;
 
         return;
     }

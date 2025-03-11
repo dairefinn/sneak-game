@@ -49,10 +49,9 @@ CharacterStatsUI = NodePath("../CharacterStatsUI")
 [node name="Crosshair" parent="CanvasLayer" instance=ExtResource("5_hlfm5")]
 
 [node name="LevelTesting" parent="." instance=ExtResource("1_1wx7x")]
-collision_mask = 0
 
 [node name="NonPlayer" parent="." instance=ExtResource("8_pgai2")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 11.7788, 5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.86365, 11.7788, 8.32342)
 Character = ExtResource("9_kryet")
 
 [node name="NpcInteractionArea" type="Area3D" parent="NonPlayer"]

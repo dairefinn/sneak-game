@@ -33,7 +33,7 @@ public partial class NpcActionFollow : NonPlayerAction
 
         
         MovementContoller.TargetPosition = _target.GlobalTransform.Origin;
-        MovementContoller.MovementSpeed = MovementSpeed;
+        MovementContoller.Speed = MovementSpeed;
 
         return;
     }

@@ -499,8 +499,9 @@ shape = SubResource("CapsuleShape3D_sy0pf")
 transform = Transform3D(1.00744, 0, 0, 0, 1.00744, 0, 0, 0, 1.00744, 0, 0.88874, 0)
 shape = SubResource("CapsuleShape3D_ey8qo")
 
-[node name="MovementController" type="Node" parent="."]
+[node name="MovementController" type="Node" parent="." node_paths=PackedStringArray("NavigationAgent")]
 script = ExtResource("3_owvmm")
+NavigationAgent = NodePath("../NavigationAgent3D")
 
 [node name="NonPlayerBrain" parent="." instance=ExtResource("4_lbudn")]
 
@@ -541,3 +542,5 @@ ActionDescription = "Follow a node"
 ActionCost = 1
 
 [node name="NpcActionAttack" type="Node" parent="NonPlayerBrain"]
+
+[node name="NavigationAgent3D" type="NavigationAgent3D" parent="."]
